@@ -1,0 +1,15 @@
+# Dependencies — install ulang via `npm install` di scripts/
+node_modules/
+
+# OS / editor junk
+.DS_Store
+*.swp
+
+# Output hasil audit (kalau ditest lokal, jangan keikut commit)
+output/
+*.docx
+!examples/*.docx
+
+# Data audit yang mungkin sensitif (nama con belum dipublikasi dsb)
+/data/*.json
+!examples/*.json

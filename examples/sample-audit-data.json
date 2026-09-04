@@ -1,0 +1,62 @@
+{
+  "con_name": "TestFurCon 2027 (Dummy Data)",
+  "audit_date": "2026-09-04",
+  "auditor": "HyperGaruda",
+  "source_url": "https://example-testcon.org/terms",
+  "source_accessed_at": "2026-09-04T10:00:00Z",
+  "jurisdiction_tiers": {
+    "tier_1": ["Malaysia", "Singapore"],
+    "tier_2": ["EU (GDPR)", "Indonesia", "Thailand", "Philippines"],
+    "tier_3": ["China", "India", "UK", "Vietnam"]
+  },
+  "summary": {
+    "critical": 1,
+    "moderate": 1,
+    "minor": 1,
+    "compliant": 1,
+    "overall_note": "Ini contoh dummy buat verifikasi rendering docx."
+  },
+  "findings": [
+    {
+      "category": "Data Privacy & PII handling",
+      "clause_excerpt": "Panitia berhak menyimpan data peserta selamanya tanpa batas waktu.",
+      "analysis": "Klausul retensi data tanpa batas waktu berpotensi melanggar prinsip data minimization pada GDPR maupun UU PDP Indonesia.",
+      "severity": "critical",
+      "jurisdictions_affected": ["EU (GDPR)", "Indonesia"],
+      "recommendation": "Tambahkan retention period yang jelas dan mekanisme penghapusan data atas permintaan."
+    },
+    {
+      "category": "Liability Waiver & Indemnification",
+      "clause_excerpt": "Peserta melepaskan seluruh hak tuntutan atas kelalaian panitia dalam bentuk apapun.",
+      "analysis": "Waiver untuk gross negligence umumnya tidak enforceable di banyak yurisdiksi.",
+      "severity": "moderate",
+      "jurisdictions_affected": ["Malaysia", "Singapore"],
+      "recommendation": "Batasi scope waiver hanya untuk risiko ordinary, bukan gross negligence."
+    },
+    {
+      "category": "Terms Update Clause",
+      "clause_excerpt": "Syarat dapat berubah sewaktu-waktu tanpa pemberitahuan.",
+      "analysis": "Best practice biasanya minta ada notice period wajar.",
+      "severity": "minor",
+      "jurisdictions_affected": [],
+      "recommendation": "Tambahkan notice period minimal 14 hari sebelum perubahan berlaku."
+    },
+    {
+      "category": "Anti-discrimination & Harassment Policy",
+      "clause_excerpt": "Panitia memiliki mekanisme laporan pelecehan yang jelas dan due process.",
+      "analysis": "Sudah cukup jelas dan sesuai best practice umum.",
+      "severity": "compliant",
+      "jurisdictions_affected": [],
+      "recommendation": "Tidak ada, sudah baik."
+    }
+  ],
+  "cross_law_comparison": [
+    {
+      "topic": "Liability Waiver Enforceability",
+      "rows": [
+        {"jurisdiction": "Malaysia", "position": "Waiver gross negligence umumnya tidak berlaku."},
+        {"jurisdiction": "Singapore", "position": "Serupa, dilindungi UCTA-like principle."}
+      ]
+    }
+  ]
+}
