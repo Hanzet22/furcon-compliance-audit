@@ -1,0 +1,57 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://hanzet22.github.io/furcon-compliance-audit/schemas/error.schema.json",
+  "title": "error",
+  "description": "Stable machine-readable error envelope.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": "1.0.0"
+    },
+    "code": {
+      "type": "string",
+      "enum": [
+        "invalid_input",
+        "schema_validation_failed",
+        "reference_validation_failed",
+        "provider_unavailable",
+        "provider_rate_limited",
+        "provider_error",
+        "retrieval_blocked",
+        "retrieval_failed",
+        "capability_unavailable",
+        "operation_unsupported",
+        "human_review_required",
+        "internal_error"
+      ]
+    },
+    "message": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 1000
+    },
+    "retryable": {
+      "type": "boolean"
+    },
+    "provider_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "correlation_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "pattern": "^[a-zA-Z0-9_-]{8,80}$"
+    }
+  },
+  "required": [
+    "schema_version",
+    "code",
+    "message",
+    "retryable"
+  ]
+}
