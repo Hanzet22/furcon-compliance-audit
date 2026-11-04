@@ -310,6 +310,9 @@ def retrieve_page(
             text, title, language = extractor.result()
         else:
             text, title, language = decoded.strip(), None, None
+        final_source_id = "source_" + hashlib.sha256(final_url.encode("utf-8")).hexdigest()[:20]
+        base["source"]["source_id"] = final_source_id
+        base["retrieval"]["source_id"] = final_source_id
         base["source"]["canonical_url"] = final_url
         base["source"]["title"] = title
         base["retrieval"].update({
