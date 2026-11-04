@@ -17,7 +17,8 @@ def validate_report_semantics(report):
         "sources":"source_id", "retrievals":"retrieval_id", "evidence":"evidence_id",
         "claims":"claim_id", "legal_authorities":"authority_id",
         "legal_propositions":"proposition_id", "jurisdiction_assessments":"jurisdiction_assessment_id",
-        "assessments":"assessment_id", "findings":"finding_id", "human_reviews":"review_id"
+        "assessments":"assessment_id", "findings":"finding_id", "human_reviews":"review_id",
+        "translations":"translation_id"
     }
     for collection, key in keys.items():
         index = {}
@@ -42,20 +43,32 @@ def validate_report_semantics(report):
 
     relations = [
         ("research_attempts","research_task_id","research_tasks"),
-        ("retrievals","source_id","sources"), ("retrievals","attempt_id","research_attempts"), ("evidence","retrieval_id","retrievals"),
-        ("claims","evidence_ids","evidence"), ("legal_authorities","retrieval_id","retrievals"), ("legal_propositions","authority_ids","legal_authorities"),
+        ("retrievals","source_id","sources"),
+        ("retrievals","attempt_id","research_attempts"),
+        ("evidence","retrieval_id","retrievals"),
+        ("claims","evidence_ids","evidence"),
+        ("legal_authorities","retrieval_id","retrievals"),
+        ("legal_propositions","authority_ids","legal_authorities"),
         ("jurisdiction_assessments","legal_proposition_ids","legal_propositions"),
-        ("assessments","claim_ids","claims"), ("assessments","evidence_ids","evidence"),
+        ("assessments","claim_ids","claims"),
+        ("assessments","evidence_ids","evidence"),
         ("assessments","legal_proposition_ids","legal_propositions"),
         ("findings","assessment_ids","assessments"),
         ("findings","jurisdiction_assessment_ids","jurisdiction_assessments"),
         ("findings","supporting_evidence_ids","evidence"),
-        ("findings","contrary_evidence_ids","evidence"), ("translations","evidence_id","evidence")
+        ("findings","contrary_evidence_ids","evidence"),
+        ("translations","evidence_id","evidence")
     ]
     for relation in relations:
         check_refs(*relation)
 
-    for pos, review in enumerate(report.get("human_reviews", [])):\n        valid_targets = set().union(*(set(index.values()) for index in indexes.values()))\n        known_ids = {row_id for index in indexes.values() for row_id in index}\n        for target_id in review.get("target_ids", []):\n            if target_id not in known_ids:\n                errors.append(f"human_reviews[{pos}].target_ids: unresolved target ID {target_id}")\n\n    for pos, finding in enumerate(report.get("findings", [])):
+    known_ids = {row_id for index in indexes.values() for row_id in index}
+    for pos, review in enumerate(report.get("human_reviews", [])):
+        for target_id in review.get("target_ids", []):
+            if target_id not in known_ids:
+                errors.append(f"human_reviews[{pos}].target_ids: unresolved target ID {target_id}")
+
+    for pos, finding in enumerate(report.get("findings", [])):
         if finding.get("assessment_status") == "supported_concern":
             if not finding.get("supporting_evidence_ids"):
                 errors.append(f"findings[{pos}]: supported concern requires evidence")
