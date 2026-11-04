@@ -226,6 +226,58 @@
               "$ref": "#/$defs/id"
             },
             "uniqueItems": true
+          },
+          "evidence_relations": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "evidence_id": {
+                  "$ref": "#/$defs/id"
+                },
+                "relationship": {
+                  "enum": [
+                    "supports",
+                    "contradicts",
+                    "qualifies",
+                    "context"
+                  ]
+                }
+              },
+              "required": [
+                "evidence_id",
+                "relationship"
+              ]
+            },
+            "uniqueItems": true
+          },
+          "verification_status": {
+            "enum": [
+              "unverified",
+              "partially_supported",
+              "supported",
+              "contradicted",
+              "mixed"
+            ]
+          },
+          "claim_type": {
+            "enum": [
+              "organizer_statement",
+              "observed_practice",
+              "event_fact",
+              "user_supplied_fact",
+              "other"
+            ]
+          },
+          "actor": {
+            "type": "string"
+          },
+          "activity": {
+            "type": [
+              "string",
+              "null"
+            ]
           }
         },
         "required": [
@@ -673,4 +725,4 @@
       ]
     }
   }
-}
+}\n
