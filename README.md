@@ -12,6 +12,7 @@ Evidence-led preliminary review of convention terms, privacy notices, codes of c
 - JSON/Markdown canonical outputs; DOCX/HTML/PDF optional.
 - Draft 2020-12 domain schemas and semantic reference validation.
 - Frozen v1.0.0 interchange contract with versioning policy and stable error envelope.
+- Phase 3 application-engine boundary with explicit search and retrieval ports.
 
 ## Quick start
 Python 3.10+.
@@ -25,6 +26,32 @@ furcon-audit examples/sample-report.v1.json --markdown report.md
 ~~~
 
 Core validation/rendering has no network dependency. Provider adapters are optional and use REST over the Python standard library; no provider is assumed connected.
+
+## Application engine
+
+Phase 3 introduces a single application entry point with injected dependencies. The first migration slice preserves the existing research workflow while establishing the boundary for the subsequent orchestration rewrite.
+
+~~~python
+from furcon_audit import AuditEngine, EngineConfig
+from furcon_audit.capabilities import CapabilityRegistry
+from furcon_audit.providers import ExaAdapter, FirecrawlAdapter
+from furcon_audit.research import ResearchTask
+
+registry = CapabilityRegistry()
+registry.register(ExaAdapter())
+registry.register(FirecrawlAdapter())
+
+engine = AuditEngine(registry, config=EngineConfig(max_candidates=5))
+task = ResearchTask(
+    "task_policy_001",
+    "audit_001",
+    "Find official event policies",
+    ("identify official policy sources",),
+)
+result = engine.run_research(task, "official event privacy and refund policy")
+~~~
+
+The engine accepts a compatible search gateway and an injectable page retriever. The default retriever remains the controlled public-page retrieval implementation. Phase 3 is incremental; see ENGINE_ARCHITECTURE.md for boundaries and migration stages.
 
 ## Optional web-search providers
 
@@ -70,29 +97,18 @@ Legal applicability is fact-specific. Do not infer it solely from attendee natio
 
 ## API contract and compatibility
 
-The v1.0.0 JSON interchange contract is frozen. See [API_CONTRACT.md](API_CONTRACT.md) for schemas, provider boundaries, error envelopes, and change control; [VERSIONING.md](VERSIONING.md) for semantic versioning and migration policy.
+The v1.0.0 JSON interchange contract is frozen. See API_CONTRACT.md for schemas, provider boundaries, error envelopes, and change control; VERSIONING.md for semantic versioning and migration policy.
 
 ## Security and conformance
 
-See [Phase 2C.2 security review](SECURITY_REVIEW_2C2.md) for the latest security hardening findings and residual risks.
+See SECURITY_REVIEW_2C2.md for the latest security hardening findings and residual risks.
 
-See [Phase 2C.1 repository audit](RELEASE_READINESS_AUDIT.md) for the latest release-readiness findings and remaining verification boundaries.
+See RELEASE_READINESS_AUDIT.md for the latest release-readiness findings and remaining verification boundaries.
 
-See [SECURITY.md](SECURITY.md) for retrieval and data-handling boundaries and [COMPATIBILITY.md](COMPATIBILITY.md) for verified versus unverified integrations. Exa/Firecrawl tests use mocked REST fixtures; they are not live-provider certifications or agent-runtime compatibility claims.
+See SECURITY.md for retrieval and data-handling boundaries and COMPATIBILITY.md for verified versus unverified integrations. Exa/Firecrawl tests use mocked REST fixtures; they are not live-provider certifications or agent-runtime compatibility claims.
 
 ## Search-to-retrieval orchestration
 
-The core can connect a configured search registry to the public-page retrieval layer without creating Evidence automatically:
-
-~~~python
-from furcon_audit.pipeline import run_research_task
-from furcon_audit.research import ResearchTask
-
-task = ResearchTask(
-    "task_policy_001", "audit_001", "Find official event policies",
-    ("identify official policy sources",),
-)
-result = run_research_task(task, registry, "official event privacy and refund policy")
-~~~
+The legacy-compatible workflow can connect a configured search registry to the public-page retrieval layer without creating Evidence automatically. New application code should prefer AuditEngine.
 
 The result preserves task/attempt records, source identities, retrieval records, captured content, and unresolved gaps. Evidence and claims remain empty until explicitly created through the evidence/claim workflow.
