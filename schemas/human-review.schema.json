@@ -45,6 +45,12 @@
         "string",
         "null"
       ]
+    },
+    "stale_reason": {
+      "type": [
+        "string",
+        "null"
+      ]
     }
   },
   "required": [
