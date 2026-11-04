@@ -1,6 +1,7 @@
 """Human review lifecycle with revision freshness and explicit decision gates."""
 from __future__ import annotations
 
+import re
 import uuid
 from datetime import datetime, timezone
 from typing import Any
@@ -38,15 +39,20 @@ def create_review(
 ) -> dict[str, Any]:
     if not target_ids or len(target_ids) != len(set(target_ids)):
         raise ValueError("review requires unique target IDs")
+    if any(not re.fullmatch(r"[a-z][a-z0-9_-]{2,63}", item) for item in target_ids):
+        raise ValueError("invalid review target ID")
     if not reviewer_role.strip() or not revision.strip():
         raise ValueError("reviewer_role and revision are required")
     if review_status not in TRANSITIONS or decision not in DECISIONS:
         raise ValueError("unsupported review status or decision")
     if review_status == "accepted" and decision != "approve":
         raise ValueError("accepted review requires approve decision")
+    identifier = review_id or "review_" + uuid.uuid4().hex[:20]
+    if not re.fullmatch(r"[a-z][a-z0-9_-]{2,63}", identifier):
+        raise ValueError("invalid review_id")
     return {
         "schema_version": "1.0.0",
-        "review_id": review_id or "review_" + uuid.uuid4().hex[:20],
+        "review_id": identifier,
         "target_ids": list(target_ids), "reviewer_role": reviewer_role.strip(),
         "review_status": review_status, "decision": decision,
         "reviewed_at": datetime.now(timezone.utc).isoformat(),
