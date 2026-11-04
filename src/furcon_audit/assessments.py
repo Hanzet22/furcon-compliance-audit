@@ -31,9 +31,12 @@ def create_assessment(
         raise ValueError("unsupported assessment_status")
     if confidence not in CONFIDENCE:
         raise ValueError("unsupported confidence")
+    identifier = assessment_id or "assessment_" + uuid.uuid4().hex[:20]
+    if not re.fullmatch(r"[a-z][a-z0-9_-]{2,63}", identifier):
+        raise ValueError("invalid assessment_id")
     return {
         "schema_version": "1.0.0",
-        "assessment_id": assessment_id or "assessment_" + uuid.uuid4().hex[:20],
+        "assessment_id": identifier,
         "question": question.strip(), "assessment_status": assessment_status,
         "rationale": rationale.strip(), "confidence": confidence,
         "claim_ids": _ids(claim_ids or [], "claim"),
@@ -62,9 +65,12 @@ def create_finding(
     contrary = _ids(contrary_evidence_ids or [], "contrary evidence")
     if assessment_status == "supported_concern" and (not assessments or not supporting):
         raise ValueError("supported_concern requires an assessment and supporting evidence")
+    identifier = finding_id or "finding_" + uuid.uuid4().hex[:20]
+    if not re.fullmatch(r"[a-z][a-z0-9_-]{2,63}", identifier):
+        raise ValueError("invalid finding_id")
     return {
         "schema_version": "1.0.0",
-        "finding_id": finding_id or "finding_" + uuid.uuid4().hex[:20],
+        "finding_id": identifier,
         "title": title.strip(), "category": category.strip(),
         "assessment_status": assessment_status, "severity": severity,
         "confidence": confidence, "rationale": rationale.strip(),
