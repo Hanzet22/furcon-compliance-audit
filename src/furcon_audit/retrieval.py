@@ -285,6 +285,11 @@ def retrieve_page(
             raise RetrievalError("robots_disallowed", "robots.txt disallows this retrieval.",
                                  outcome="blocked")
         response = bounded_fetch(canonical_url)
+        if not isinstance(response, FetchResponse) or not isinstance(response.body, bytes):
+            raise RetrievalError("invalid_fetch_response", "Retriever returned an invalid response.")
+        if len(response.body) > max_bytes:
+            raise RetrievalError("payload_too_large",
+                                 "Response exceeded the configured size limit.", outcome="blocked")
         if response.status in {401, 403, 407, 451}:
             raise RetrievalError("access_restricted", f"Source returned HTTP {response.status}.",
                                  outcome="blocked")
