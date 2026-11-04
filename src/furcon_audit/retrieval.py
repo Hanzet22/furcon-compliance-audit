@@ -115,25 +115,94 @@ class _SafeRedirect(urllib.request.HTTPRedirectHandler):
         return super().redirect_request(req, fp, code, msg, headers, newurl)
 
 
-def _stdlib_fetch(url: str, timeout: int, max_bytes: int) -> FetchResponse:
-    safe_url = _validate_public_url(url)
-    opener = urllib.request.build_opener(_SafeRedirect)
-    request = urllib.request.Request(safe_url, headers={"User-Agent": USER_AGENT,
-                                  "Accept": "text/html,text/plain,application/xhtml+xml;q=0.9,*/*;q=0.1"})
+def _resolve_public_addresses(host: str, port: int) -> list[str]:
     try:
-        with opener.open(request, timeout=timeout) as response:
-            body = response.read(max_bytes + 1)
-            if len(body) > max_bytes:
-                raise RetrievalError("payload_too_large", "Response exceeded the configured size limit.",
-                                     outcome="blocked")
-            return FetchResponse(response.status, dict(response.headers.items()), body,
-                                 response.geturl())
-    except urllib.error.HTTPError as exc:
-        return FetchResponse(exc.code, dict(exc.headers.items()) if exc.headers else {},
-                             exc.read(max_bytes + 1), exc.geturl())
-    except urllib.error.URLError as exc:
-        raise RetrievalError("network_error", "The source could not be retrieved.") from exc
+        literal = ipaddress.ip_address(host)
+        addresses = [str(literal)]
+    except ValueError:
+        try:
+            records = socket.getaddrinfo(host, port, type=socket.SOCK_STREAM)
+            addresses = list(dict.fromkeys(row[4][0].split("%", 1)[0] for row in records))
+        except (OSError, ValueError, IndexError) as exc:
+            raise RetrievalError("dns_failure", "Hostname could not be resolved.") from exc
+    parsed = [ipaddress.ip_address(value) for value in addresses]
+    if not parsed or any(not address.is_global for address in parsed):
+        raise RetrievalError("private_network_target",
+                             "Private or non-public network targets are blocked.",
+                             outcome="blocked")
+    return addresses
 
+
+class _PinnedHTTPConnection(http.client.HTTPConnection):
+    def __init__(self, host: str, port: int, ip: str, timeout: int):
+        super().__init__(host, port, timeout=timeout)
+        self._pinned_ip = ip
+
+    def connect(self):
+        self.sock = socket.create_connection((self._pinned_ip, self.port), self.timeout)
+
+
+class _PinnedHTTPSConnection(http.client.HTTPSConnection):
+    def __init__(self, host: str, port: int, ip: str, timeout: int):
+        super().__init__(host, port, timeout=timeout, context=ssl.create_default_context())
+        self._pinned_ip = ip
+
+    def connect(self):
+        raw = socket.create_connection((self._pinned_ip, self.port), self.timeout)
+        self.sock = self._context.wrap_socket(raw, server_hostname=self.host)
+
+
+def _stdlib_fetch(url: str, timeout: int, max_bytes: int) -> FetchResponse:
+    current = _validate_public_url(url)
+    for redirect_count in range(6):
+        parsed = urllib.parse.urlsplit(current)
+        host = parsed.hostname or ""
+        port = parsed.port or (443 if parsed.scheme == "https" else 80)
+        addresses = _resolve_public_addresses(host, port)
+        path = urllib.parse.urlunsplit(("", "", parsed.path or "/", parsed.query, ""))
+        response = None
+        last_error = None
+        for address in addresses:
+            connection = (_PinnedHTTPSConnection(host, port, address, timeout)
+                          if parsed.scheme == "https"
+                          else _PinnedHTTPConnection(host, port, address, timeout))
+            try:
+                connection.request("GET", path, headers={
+                    "Host": parsed.netloc, "User-Agent": USER_AGENT,
+                    "Accept": "text/html,text/plain,application/xhtml+xml;q=0.9,*/*;q=0.1"
+                })
+                response = connection.getresponse()
+                headers = dict(response.getheaders())
+                location = response.getheader("Location")
+                if response.status in {301, 302, 303, 307, 308} and location:
+                    response.read(max_bytes + 1)
+                    connection.close()
+                    if redirect_count >= 5:
+                        raise RetrievalError("too_many_redirects", "Redirect limit exceeded.",
+                                             outcome="blocked")
+                    current = urllib.parse.urljoin(current, location)
+                    current = _validate_public_url(current)
+                    break
+                body = response.read(max_bytes + 1)
+                if len(body) > max_bytes:
+                    raise RetrievalError("payload_too_large",
+                                         "Response exceeded the configured size limit.",
+                                         outcome="blocked")
+                final_url = current
+                response.close()
+                connection.close()
+                return FetchResponse(response.status, headers, body, final_url)
+            except RetrievalError:
+                connection.close()
+                raise
+            except (OSError, http.client.HTTPException) as exc:
+                last_error = exc
+                connection.close()
+        else:
+            raise RetrievalError("network_error", "The source could not be retrieved.") from last_error
+        if response is None:
+            continue
+    raise RetrievalError("too_many_redirects", "Redirect limit exceeded.", outcome="blocked")
 
 def _robots_allowed(url: str, user_agent: str, fetch: Callable) -> bool:
     parsed = urllib.parse.urlsplit(url)
