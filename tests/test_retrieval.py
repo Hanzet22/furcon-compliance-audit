@@ -8,7 +8,7 @@ from furcon_audit.retrieval import (
 class RetrievalPipelineTests(unittest.TestCase):
     @staticmethod
     def public_dns(*_):
-        return [(None, None, None, None, (\"93.184.216.34\", 443))]
+        return [(None, None, None, None, ("93.184.216.34", 443))]
 
     def test_success_preserves_raw_and_extracted_content_with_hash(self):
         body = b"<html lang='en'><head><title>Event Terms</title></head><body><h1>Terms</h1><p>Refunds apply.</p></body></html>"
@@ -62,7 +62,7 @@ class RetrievalPipelineTests(unittest.TestCase):
         def pdf(url, timeout, max_bytes):
             return FetchResponse(200, {"Content-Type": "application/pdf"}, b"%PDF", url)
         result = retrieve_page("https://example.org/file.pdf", fetcher=pdf,
-                               robots_checker=lambda *_: True)
+                               robots_checker=lambda *_: True, resolver=self.public_dns)
         self.assertEqual(result["retrieval"]["outcome"], "blocked")
         self.assertEqual(result["retrieval"]["error_code"], "unsupported_media_type")
 
