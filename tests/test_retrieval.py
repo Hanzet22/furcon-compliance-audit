@@ -65,6 +65,16 @@ class RetrievalPipelineTests(unittest.TestCase):
         self.assertEqual(result["retrieval"]["outcome"], "blocked")
         self.assertEqual(result["retrieval"]["error_code"], "unsupported_media_type")
 
+    def test_redirected_capture_uses_final_canonical_source_identity(self):
+        body = b"<html><title>Final</title><body>Final policy.</body></html>"
+        def fetcher(url, timeout, max_bytes):
+            return FetchResponse(200, {"Content-Type": "text/html"}, body,
+                                 "https://example.org/canonical")
+        result = retrieve_page("https://example.org/alias", fetcher=fetcher,
+                               robots_checker=lambda *_: True, resolver=self.public_dns)
+        self.assertEqual(result["source"]["canonical_url"], "https://example.org/canonical")
+        self.assertEqual(result["source"]["source_id"], result["retrieval"]["source_id"])
+
     def test_invalid_attempt_id_rejected(self):
         with self.assertRaises(ValueError):
             retrieve_page("https://example.org", attempt_id="INVALID!",
