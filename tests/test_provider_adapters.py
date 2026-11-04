@@ -109,6 +109,11 @@ class ProviderAdapterTests(unittest.TestCase):
         with self.assertRaisesRegex(ProviderError, "non-object"):
             registry.execute_with_fallback("search.web", "search", {})
 
+    def test_non_object_json_response_is_reported_as_provider_error(self):
+        adapter = ExaAdapter(api_key="key", transport=lambda *args: HttpResponse(200, {}, b"[]"))
+        with self.assertRaisesRegex(ProviderError, "non-object JSON"):
+            adapter.execute("search", {"query": "test"})
+
     def test_invalid_search_input_is_rejected(self):
         adapter = ExaAdapter(api_key="key")
         with self.assertRaises(ValueError):
