@@ -311,6 +311,61 @@
               "null"
             ],
             "pattern": "^[a-z][a-z0-9_-]{2,63}$"
+          },
+          "citation": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "issuing_body": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "official_url": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uri"
+          },
+          "publication_date": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date"
+          },
+          "effective_date": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date"
+          },
+          "end_date": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date"
+          },
+          "authority_status": {
+            "enum": [
+              "current",
+              "amended",
+              "repealed",
+              "historical",
+              "unknown"
+            ]
+          },
+          "original_language": {
+            "type": [
+              "string",
+              "null"
+            ]
           }
         },
         "required": [
@@ -336,6 +391,24 @@
               "$ref": "#/$defs/id"
             },
             "uniqueItems": true
+          },
+          "statement": {
+            "type": "string"
+          },
+          "provision_reference": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "binding_status": {
+            "enum": [
+              "binding",
+              "persuasive",
+              "guidance",
+              "commentary",
+              "uncertain"
+            ]
           }
         },
         "required": [
