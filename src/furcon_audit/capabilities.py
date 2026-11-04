@@ -56,8 +56,12 @@ class CapabilityRegistry:
         for adapter in self.candidates(capability_id, operation):
             try:
                 result = adapter.execute(operation, payload)
-                result["fallback_attempts"] = failures
-                return result
+                if not isinstance(result, dict):
+                    raise ProviderError(adapter.declaration.provider_id,
+                                        "Provider returned a non-object result.")
+                normalized = dict(result)
+                normalized["fallback_attempts"] = list(failures)
+                return normalized
             except ProviderError as exc:
                 failures.append({"provider_id": exc.provider_id,
                                  "status_code": exc.status_code,
