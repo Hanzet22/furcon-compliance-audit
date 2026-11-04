@@ -5,7 +5,7 @@
 Evidence-led preliminary review of convention terms, privacy notices, codes of conduct, registration rules, and event policies. Not legal advice, legal opinion, certification, or guarantee.
 
 ## v2
-- Platform-neutral domain and application core.
+- Platform-neutral domain/application core.
 - Capability-based optional adapters.
 - Source → Retrieval → Evidence → Claim → Assessment → Finding traceability.
 - Separate legal authorities and legal propositions.
@@ -23,6 +23,6 @@ python -m unittest discover -s tests -v
 furcon-audit examples/sample-report.v1.json --markdown report.md
 ~~~
 
-Core validation/rendering has no network dependency. Provider adapters are not bundled as connected services. Agent/provider compatibility remains planned until conformance tests pass.
+Core validation/rendering has no network dependency. Provider adapters are interfaces only; no provider is assumed connected. Agent/provider compatibility remains unverified until conformance tests pass.
 
 Legal applicability is fact-specific. Search snippets are discovery leads only. Missing text does not prove breach. Preserve original-language material and translation provenance.
