@@ -1,6 +1,6 @@
 # FurCon Compliance Audit
 
-**Version 2.0.0 · MIT · Platform-neutral core**
+**Version 2.0.0 (unreleased source version) · MIT · Platform-neutral core**
 
 Evidence-led preliminary review of convention terms, privacy notices, codes of conduct, registration rules, and event policies. Not legal advice, legal opinion, certification, or guarantee.
 
