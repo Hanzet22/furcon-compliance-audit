@@ -97,6 +97,16 @@ class RetrievalPipelineTests(unittest.TestCase):
                                robots_checker=lambda *_: True, resolver=self.public_dns)
         self.assertEqual(result["retrieval"]["error_code"], "invalid_fetch_response")
 
+    def test_https_redirect_downgrade_is_blocked_before_fetch(self):
+        from furcon_audit.retrieval import _validate_redirect_url
+        with self.assertRaisesRegex(RetrievalError, "HTTPS redirects"):
+            _validate_redirect_url("https://example.org/start", "http://example.net/target")
+
+    def test_https_redirect_to_https_is_allowed(self):
+        from furcon_audit.retrieval import _validate_redirect_url
+        result = _validate_redirect_url("https://example.org/start", "https://example.net/target")
+        self.assertEqual(result, "https://example.net/target")
+
     def test_https_downgrade_is_blocked(self):
         response = FetchResponse(200, {"Content-Type": "text/plain"}, b"ok",
                                  "http://example.org/final")
