@@ -2,6 +2,7 @@
 from dataclasses import dataclass
 from typing import Any, Protocol
 
+
 @dataclass(frozen=True)
 class CapabilityDeclaration:
     provider_id: str
@@ -17,12 +18,16 @@ class CapabilityDeclaration:
     availability: str = "unknown"
     limitations: tuple[str, ...] = ()
 
+
 class CapabilityAdapter(Protocol):
     declaration: CapabilityDeclaration
+
     def execute(self, operation: str, payload: dict[str, Any]) -> dict[str, Any]: ...
 
+
 class CapabilityRegistry:
-    """Resolve adapters by capability and operation, with bounded capability-scoped fallback."""
+    """Resolve adapters by capability and operation, with capability-scoped fallback."""
+
     def __init__(self) -> None:
         self._adapters: list[CapabilityAdapter] = []
 
@@ -46,13 +51,18 @@ class CapabilityRegistry:
         candidates = self.candidates(capability_id, operation)
         if not candidates:
             raise LookupError(f"No available adapter for {capability_id}:{operation}")
-        return candidates[0].execute(operation, payload)
+        result = candidates[0].execute(operation, payload)
+        if not isinstance(result, dict):
+            raise TypeError("Capability adapter returned a non-object result.")
+        return result
 
     def execute_with_fallback(self, capability_id: str, operation: str,
                               payload: dict[str, Any]) -> dict[str, Any]:
-        """Try providers in registration order; only provider failures trigger fallback."""
+        """Try providers in registration order; malformed outputs are treated as provider failures."""
         from .providers import ProviderError
+
         failures = []
+        last_error = None
         for adapter in self.candidates(capability_id, operation):
             try:
                 result = adapter.execute(operation, payload)
@@ -63,11 +73,15 @@ class CapabilityRegistry:
                 normalized["fallback_attempts"] = list(failures)
                 return normalized
             except ProviderError as exc:
-                failures.append({"provider_id": exc.provider_id,
-                                 "status_code": exc.status_code,
-                                 "error": str(exc),
-                                 "retryable": exc.retryable})
+                last_error = exc
+                failures.append({
+                    "provider_id": exc.provider_id,
+                    "status_code": exc.status_code,
+                    "error": str(exc),
+                    "retryable": exc.retryable,
+                })
         if failures:
-            raise ProviderError("registry", "All candidate providers failed: " +
-                                "; ".join(item["provider_id"] for item in failures))
+            details = "; ".join(item["provider_id"] for item in failures)
+            reason = f"; last error: {last_error}" if last_error else ""
+            raise ProviderError("registry", f"All candidate providers failed: {details}{reason}")
         raise LookupError(f"No available adapter for {capability_id}:{operation}")
