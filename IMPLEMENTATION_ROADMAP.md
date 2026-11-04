@@ -17,7 +17,8 @@ This roadmap records completed core implementation work and the next major engin
 | 2C.1 | Full repository audit | Findings recorded, fixes applied, Python matrix, wheel checks | Complete — see RELEASE_READINESS_AUDIT.md |
 | 2C.2 | Dedicated security review | Defensive input/network/provider hardening, static scans, residual risks documented | Complete — code-level review, not security certification |
 | 2C.3 | API contract freeze | Frozen schemas, stable error envelope, versioning policy, conformance tests | Complete — frozen v1.0.0 contract |
-| 3.1 | Application boundary and migration seam | Engine facade, injected ports, config validation, characterization tests | In progress |
+| 3.1 | Application boundary and migration seam | Engine facade, injected ports, config validation, characterization tests | Complete — CI verified |
+| 3.2 | Research workflow extraction | Orchestration moves behind application services; legacy function delegates without behavior drift | In progress |
 | 3.2 | Research workflow extraction | Orchestration moves behind application services; legacy function delegates without behavior drift | Planned |
 | 3.3 | Domain service boundaries | Evidence, claims, jurisdiction, assessment, and review workflows expose consistent service interfaces | Planned |
 | 3.4 | Infrastructure adapters | Search and retrieval adapters implement ports; provider-specific behavior remains isolated | Planned |
