@@ -2,12 +2,13 @@
 from __future__ import annotations
 
 import uuid
+from dataclasses import asdict
 from datetime import datetime, timezone
 from typing import Any, Callable
 
 from .providers import ProviderError
 from .research import ResearchTask
-from .retrieval import retrieve_page
+from .retrieval import RetrievalError, retrieve_page
 
 
 def _now() -> str:
@@ -67,7 +68,7 @@ def run_research_task(
                                  "failed", started, error_code=type(exc).__name__,
                                  error_summary=str(exc), query_summary=query.strip()))
         task.transition("failed", "Search providers were unavailable or failed.")
-        return {"research_task": task, "research_attempts": attempts, "sources": [],
+        return {"research_task": asdict(task), "research_attempts": attempts, "sources": [],
                 "retrievals": [], "captures": [], "unresolved": [str(exc)]}
 
     for failure in search_result.get("fallback_attempts", []):
@@ -79,12 +80,15 @@ def run_research_task(
         ))
     provider_id = search_result.get("provider_id", "unknown")
     results = search_result.get("results", [])
+    if not isinstance(results, list):
+        results = []
+        unresolved.append("Search provider returned an invalid results collection.")
     search_status = "succeeded" if results else "no_results"
     attempts.append(_attempt(task.research_task_id, provider_id, "search.web", "search",
                              search_status, started, query_summary=query.strip()))
     if not results:
         task.transition("partial", "Search completed but returned no candidate sources.")
-        return {"research_task": task, "research_attempts": attempts, "sources": [],
+        return {"research_task": asdict(task), "research_attempts": attempts, "sources": [],
                 "retrievals": [], "captures": [], "unresolved": ["No search candidates returned."]}
 
     seen_urls = set()
@@ -119,6 +123,9 @@ def run_research_task(
         ))
         # Keep the attempt reference stable and consistent with the retrieval record.
         capture["retrieval"]["attempt_id"] = attempts[-1]["attempt_id"]
+        if not isinstance(capture, dict) or not isinstance(capture.get("retrieval"), dict):
+            unresolved.append("Retriever returned an invalid capture record.")
+            continue
         if capture.get("source"):
             source_id = capture["source"].get("source_id")
             if source_id and all(item.get("source_id") != source_id for item in sources):
@@ -140,7 +147,7 @@ def run_research_task(
     else:
         task.transition("partial", "No candidate retrieval succeeded; source absence is not established.")
     return {
-        "research_task": task,
+        "research_task": asdict(task),
         "research_attempts": attempts,
         "sources": sources,
         "retrievals": retrievals,
