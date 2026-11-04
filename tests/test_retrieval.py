@@ -100,11 +100,11 @@ class RetrievalPipelineTests(unittest.TestCase):
     def test_https_redirect_downgrade_is_blocked_before_fetch(self):
         from furcon_audit.retrieval import _validate_redirect_url
         with self.assertRaisesRegex(RetrievalError, "HTTPS redirects"):
-            _validate_redirect_url("https://example.org/start", "http://example.net/target")
+            _validate_redirect_url("https://example.org/start", "http://example.net/target", self.public_dns)
 
     def test_https_redirect_to_https_is_allowed(self):
         from furcon_audit.retrieval import _validate_redirect_url
-        result = _validate_redirect_url("https://example.org/start", "https://example.net/target")
+        result = _validate_redirect_url("https://example.org/start", "https://example.net/target", self.public_dns)
         self.assertEqual(result, "https://example.net/target")
 
     def test_https_downgrade_is_blocked(self):
