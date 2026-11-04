@@ -66,6 +66,18 @@
     },
     "human_review_status": {
       "$ref": "#/$defs/review"
+    },
+    "affected_actor": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "affected_activity": {
+      "type": [
+        "string",
+        "null"
+      ]
     }
   },
   "required": [
