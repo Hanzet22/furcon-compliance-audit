@@ -142,6 +142,17 @@ class _SafeRedirect(urllib.request.HTTPRedirectHandler):
         return super().redirect_request(req, fp, code, msg, headers, newurl)
 
 
+def _validate_redirect_url(current_url: str, location: str) -> str:
+    """Validate a redirect target and forbid HTTPS downgrade before connecting."""
+    target = urllib.parse.urljoin(current_url, location)
+    validated = _validate_public_url(target)
+    if (urllib.parse.urlsplit(current_url).scheme == "https"
+            and urllib.parse.urlsplit(validated).scheme != "https"):
+        raise RetrievalError("https_downgrade", "HTTPS redirects cannot downgrade to HTTP.",
+                             outcome="blocked")
+    return validated
+
+
 def _resolve_public_addresses(host: str, port: int) -> list[str]:
     try:
         literal = ipaddress.ip_address(host)
@@ -207,8 +218,7 @@ def _stdlib_fetch(url: str, timeout: int, max_bytes: int) -> FetchResponse:
                     if redirect_count >= 5:
                         raise RetrievalError("too_many_redirects", "Redirect limit exceeded.",
                                              outcome="blocked")
-                    current = urllib.parse.urljoin(current, location)
-                    current = _validate_public_url(current)
+                    current = _validate_redirect_url(current, location)
                     break
                 body = response.read(max_bytes + 1)
                 if len(body) > max_bytes:
