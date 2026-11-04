@@ -4,6 +4,8 @@ Messages are intentionally non-sensitive. Never include credentials, authorizati
 headers, or raw secret-bearing request payloads in error metadata.
 """
 
+import re
+
 SCHEMA_VERSION = "1.0.0"
 
 ERROR_CODES = frozenset({
@@ -42,7 +44,7 @@ def error_envelope(code: str, message: str, *, retryable: bool = False,
     if correlation_id is not None:
         if (not isinstance(correlation_id, str)
                 or not 8 <= len(correlation_id) <= 80
-                or not all(c.isalnum() or c in "_-" for c in correlation_id)):
+                or re.fullmatch(r"[A-Za-z0-9_-]{8,80}", correlation_id) is None):
             raise ValueError("correlation_id must be 8-80 safe identifier characters")
     return {
         "schema_version": SCHEMA_VERSION,
