@@ -88,8 +88,9 @@ def run_research_task(
                              search_status, started, query_summary=query.strip()))
     if not results:
         task.transition("partial", "Search completed but returned no candidate sources.")
+        gaps = unresolved or ["No search candidates returned."]
         return {"research_task": asdict(task), "research_attempts": attempts, "sources": [],
-                "retrievals": [], "captures": [], "unresolved": ["No search candidates returned."]}
+                "retrievals": [], "captures": [], "unresolved": gaps}
 
     seen_urls = set()
     for candidate in results[:max_candidates]:
@@ -111,11 +112,20 @@ def run_research_task(
                                      error_code=type(exc).__name__, error_summary=str(exc)))
             unresolved.append(f"Retrieval could not be initialized for candidate: {type(exc).__name__}")
             continue
-        outcome = capture.get("retrieval", {}).get("outcome", "failed")
+        if not isinstance(capture, dict) or not isinstance(capture.get("retrieval"), dict):
+            attempts.append(_attempt(task.research_task_id, "stdlib-http", "retrieve.page",
+                                     "retrieve", "failed", attempt_started,
+                                     error_code="invalid_capture",
+                                     error_summary="Retriever returned an invalid capture record."))
+            unresolved.append("Retriever returned an invalid capture record.")
+            continue
+        outcome = capture["retrieval"].get("outcome", "failed")
         attempt_status = {"success": "succeeded", "blocked": "blocked",
                           "partial": "failed", "failed": "failed",
                           "not_modified": "succeeded"}.get(outcome, "failed")
         error = capture.get("error", {})
+        if not isinstance(error, dict):
+            error = {}
         attempts.append(_attempt(
             task.research_task_id, "stdlib-http", "retrieve.page", "retrieve",
             attempt_status, attempt_started, error_code=error.get("code"),
@@ -123,9 +133,6 @@ def run_research_task(
         ))
         # Keep the attempt reference stable and consistent with the retrieval record.
         capture["retrieval"]["attempt_id"] = attempts[-1]["attempt_id"]
-        if not isinstance(capture, dict) or not isinstance(capture.get("retrieval"), dict):
-            unresolved.append("Retriever returned an invalid capture record.")
-            continue
         if capture.get("source"):
             source_id = capture["source"].get("source_id")
             if source_id and all(item.get("source_id") != source_id for item in sources):
