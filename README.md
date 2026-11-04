@@ -66,3 +66,8 @@ Retrieval is read-only, HTTP(S)-only, public-network-only, robots-aware, and siz
 ## Legal methodology
 
 Legal applicability is fact-specific. Do not infer it solely from attendee nationality or website accessibility. Missing text/search failure does not prove breach. Preserve original-language material and translation provenance. Human review is required for legal conclusions. See `IMPLEMENTATION_ROADMAP.md` for phases 2B.1–2B.10.
+
+
+## Security and conformance
+
+See [SECURITY.md](SECURITY.md) for retrieval and data-handling boundaries and [COMPATIBILITY.md](COMPATIBILITY.md) for verified versus unverified integrations. Exa/Firecrawl tests use mocked REST fixtures; they are not live-provider certifications or agent-runtime compatibility claims.
