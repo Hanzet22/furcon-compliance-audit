@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://hanzet22.github.io/furcon-compliance-audit/schemas/evidence.schema.json",
   "title": "evidence",
-  "description": "Preserved evidence from retrieval.",
+  "description": "Explicitly selected evidence excerpt or observation linked to a successful retrieval.",
   "type": "object",
   "additionalProperties": false,
   "properties": {
@@ -24,7 +24,8 @@
       ]
     },
     "excerpt": {
-      "type": "string"
+      "type": "string",
+      "minLength": 1
     },
     "locator": {
       "type": [
@@ -40,6 +41,17 @@
     },
     "captured_at": {
       "$ref": "#/$defs/ts"
+    },
+    "source_url": {
+      "type": "string",
+      "format": "uri"
+    },
+    "content_hash": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "pattern": "^[a-f0-9]{64}$"
     }
   },
   "required": [
@@ -48,7 +60,8 @@
     "retrieval_id",
     "kind",
     "excerpt",
-    "captured_at"
+    "captured_at",
+    "source_url"
   ],
   "$defs": {
     "id": {
@@ -58,82 +71,6 @@
     "ts": {
       "type": "string",
       "format": "date-time"
-    },
-    "workflow": {
-      "enum": [
-        "not_started",
-        "in_progress",
-        "completed",
-        "partial",
-        "blocked",
-        "not_applicable"
-      ]
-    },
-    "assessment": {
-      "enum": [
-        "supported_concern",
-        "no_issue_observed",
-        "needs_clarification",
-        "not_assessed",
-        "not_applicable"
-      ]
-    },
-    "applicability": {
-      "enum": [
-        "applicable_supported",
-        "potentially_applicable",
-        "not_established",
-        "not_applicable_supported",
-        "not_assessed"
-      ]
-    },
-    "review": {
-      "enum": [
-        "not_required",
-        "pending",
-        "in_review",
-        "changes_requested",
-        "accepted",
-        "rejected",
-        "stale"
-      ]
-    },
-    "task": {
-      "enum": [
-        "queued",
-        "running",
-        "completed",
-        "partial",
-        "blocked",
-        "failed",
-        "cancelled"
-      ]
-    },
-    "attempt": {
-      "enum": [
-        "succeeded",
-        "no_results",
-        "failed",
-        "rate_limited",
-        "blocked",
-        "skipped"
-      ]
-    },
-    "severity": {
-      "enum": [
-        "critical",
-        "high",
-        "moderate",
-        "low",
-        "informational"
-      ]
-    },
-    "confidence": {
-      "enum": [
-        "low",
-        "medium",
-        "high"
-      ]
     }
   }
-}
+}\n
