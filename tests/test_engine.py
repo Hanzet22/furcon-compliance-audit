@@ -44,7 +44,7 @@ class EngineBoundaryTests(unittest.TestCase):
             retrieval_options={"timeout_seconds": 12},
         )
         expected = {"research_task": {"status": "partial"}}
-        with patch("furcon_audit.engine.run_research_task", return_value=expected) as run:
+        with patch("furcon_audit.engine.run_research_workflow", return_value=expected) as run:
             result = engine.run_research(self.task(), "official event terms")
 
         self.assertIs(result, expected)
