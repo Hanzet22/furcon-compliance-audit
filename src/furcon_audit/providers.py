@@ -161,7 +161,8 @@ class JsonSearchAdapter:
                 LOGGER.warning("provider_transport_retry provider=%s attempt=%s error=%s",
                                self.provider_id, attempt + 1, type(exc).__name__)
                 self.sleep(min(2 ** attempt, 8))
-        assert last_error is not None
+        if last_error is None:
+            raise ProviderError(self.provider_id, "Provider request ended without a result.")
         raise last_error
 
 
