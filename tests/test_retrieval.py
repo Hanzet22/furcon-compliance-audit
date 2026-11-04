@@ -6,12 +6,16 @@ from furcon_audit.retrieval import (
 
 
 class RetrievalPipelineTests(unittest.TestCase):
+    @staticmethod
+    def public_dns(*_):
+        return [(None, None, None, None, (\"93.184.216.34\", 443))]
+
     def test_success_preserves_raw_and_extracted_content_with_hash(self):
         body = b"<html lang='en'><head><title>Event Terms</title></head><body><h1>Terms</h1><p>Refunds apply.</p></body></html>"
         def fetcher(url, timeout, max_bytes):
             return FetchResponse(200, {"Content-Type": "text/html; charset=utf-8"}, body, url)
         result = retrieve_page("https://example.org/terms", attempt_id="attempt_demo_01",
-                               fetcher=fetcher, robots_checker=lambda *_: True)
+                               fetcher=fetcher, robots_checker=lambda *_: True, resolver=self.public_dns)
         self.assertEqual(result["retrieval"]["outcome"], "success")
         self.assertEqual(result["source"]["title"], "Event Terms")
         self.assertIn("Refunds apply.", result["content"]["extracted_text"])
@@ -22,7 +26,7 @@ class RetrievalPipelineTests(unittest.TestCase):
     def test_robots_disallow_is_recorded_as_blocked(self):
         result = retrieve_page("https://example.org/policy",
                                fetcher=lambda *_: self.fail("must not fetch page"),
-                               robots_checker=lambda *_: False)
+                               robots_checker=lambda *_: False, resolver=self.public_dns)
         self.assertEqual(result["retrieval"]["outcome"], "blocked")
         self.assertEqual(result["retrieval"]["error_code"], "robots_disallowed")
 
@@ -31,7 +35,7 @@ class RetrievalPipelineTests(unittest.TestCase):
             raise RetrievalError("network_error", "offline")
         result = retrieve_page("https://example.org/policy",
                                fetcher=lambda *_: self.fail("must not fetch page"),
-                               robots_checker=broken)
+                               robots_checker=broken, resolver=self.public_dns)
         self.assertEqual(result["retrieval"]["outcome"], "blocked")
         self.assertEqual(result["retrieval"]["error_code"], "robots_unavailable")
 
@@ -50,7 +54,7 @@ class RetrievalPipelineTests(unittest.TestCase):
         def forbidden(url, timeout, max_bytes):
             return FetchResponse(403, {}, b"", url)
         result = retrieve_page("https://example.org/private", fetcher=forbidden,
-                               robots_checker=lambda *_: True)
+                               robots_checker=lambda *_: True, resolver=self.public_dns)
         self.assertEqual(result["retrieval"]["outcome"], "blocked")
         self.assertEqual(result["retrieval"]["error_code"], "access_restricted")
 
