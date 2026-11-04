@@ -5,7 +5,7 @@ from dataclasses import dataclass
 from types import MappingProxyType
 from typing import Any, Mapping
 
-from .pipeline import run_research_task
+from .application.research import run_research_workflow
 from .ports import PageRetriever, SearchGateway
 from .research import ResearchTask
 from .retrieval import retrieve_page
@@ -60,7 +60,7 @@ class AuditEngine:
         self, task: ResearchTask, query: str
     ) -> dict[str, Any]:
         """Run search and controlled retrieval without auto-creating evidence."""
-        return run_research_task(
+        return run_research_workflow(
             task,
             self._search_gateway,
             query,
