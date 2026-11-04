@@ -7,7 +7,9 @@
 - Public-page retrieval permits HTTP(S) only, rejects local/private/non-global destinations, pins each connection to a validated public IP, validates each redirect, enforces a redirect limit, and bounds time and response size.
 - Robots policy is checked before retrieval. If the policy cannot be checked, retrieval fails closed.
 - Current retrieval supports HTML/XHTML and plain text. PDF parsing, authenticated pages, and private resources are not supported.
-- Provider keys are read from environment variables and must never appear in source control, report artifacts, or logs.
+- Provider keys are read from environment variables and must never appear in source control, report artifacts, or logs. Provider HTTP redirects are not followed, preventing credential headers from being forwarded to a redirect destination.
+- Retrieval accepts only the standard port for the selected scheme, rejects control characters and malformed ports, prevents HTTPS-to-HTTP downgrade, and caps configurable response size at 10 MB and timeout at 60 seconds.
+- Provider requests cap query length at 4,000 characters, retries at five, and timeout at 60 seconds. Provider response size is capped at 2 MB.
 - Avoid attendee personal data. Do not submit registration records, identity documents, private correspondence, or sensitive personal information to search providers.
 
 ## Evidence integrity
