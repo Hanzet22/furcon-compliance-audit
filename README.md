@@ -11,6 +11,7 @@ Evidence-led preliminary review of convention terms, privacy notices, codes of c
 - Separate legal authorities and legal propositions.
 - JSON/Markdown canonical outputs; DOCX/HTML/PDF optional.
 - Draft 2020-12 domain schemas and semantic reference validation.
+- Frozen v1.0.0 interchange contract with versioning policy and stable error envelope.
 
 ## Quick start
 Python 3.10+.
@@ -50,7 +51,7 @@ Adapters normalize result metadata and provider request IDs where available. Ret
 
 ## Public-page retrieval
 
-Phase 2B.2 adds a separate retrieval layer. It accepts one candidate URL and produces a normalized Source record, a timestamped Retrieval record, and a content bundle containing the original decoded response separately from extracted text. The response is represented by a SHA-256 content hash; the full body is not silently promoted into Evidence.
+The retrieval layer accepts one candidate URL and produces a normalized Source record, a timestamped Retrieval record, and a content bundle containing the original decoded response separately from extracted text. The response is represented by a SHA-256 content hash; the full body is not silently promoted into Evidence.
 
 ~~~python
 from furcon_audit.retrieval import retrieve_page
@@ -65,8 +66,11 @@ Retrieval is read-only, HTTP(S)-only, public-network-only, robots-aware, and siz
 
 ## Legal methodology
 
-Legal applicability is fact-specific. Do not infer it solely from attendee nationality or website accessibility. Missing text/search failure does not prove breach. Preserve original-language material and translation provenance. Human review is required for legal conclusions. See `IMPLEMENTATION_ROADMAP.md` for phases 2B.1–2B.10.
+Legal applicability is fact-specific. Do not infer it solely from attendee nationality or website accessibility. Missing text/search failure does not prove breach. Preserve original-language material and translation provenance. Human review is required for legal conclusions.
 
+## API contract and compatibility
+
+The v1.0.0 JSON interchange contract is frozen. See [API_CONTRACT.md](API_CONTRACT.md) for schemas, provider boundaries, error envelopes, and change control; [VERSIONING.md](VERSIONING.md) for semantic versioning and migration policy.
 
 ## Security and conformance
 
@@ -78,7 +82,7 @@ See [SECURITY.md](SECURITY.md) for retrieval and data-handling boundaries and [C
 
 ## Search-to-retrieval orchestration
 
-The core can now connect a configured search registry to the public-page retrieval layer without creating Evidence automatically:
+The core can connect a configured search registry to the public-page retrieval layer without creating Evidence automatically:
 
 ~~~python
 from furcon_audit.pipeline import run_research_task
