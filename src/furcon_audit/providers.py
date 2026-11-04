@@ -116,6 +116,10 @@ class JsonSearchAdapter:
                     parsed = json.loads(response.body.decode("utf-8"))
                 except (UnicodeDecodeError, json.JSONDecodeError) as exc:
                     raise ProviderError(self.provider_id, "Provider returned invalid JSON.") from exc
+                if not isinstance(parsed, dict):
+                    raise ProviderError(self.provider_id, "Provider returned a non-object JSON payload.")
+                if not isinstance(response.headers, dict):
+                    raise ProviderError(self.provider_id, "Transport returned invalid response headers.")
                 results = self._results(parsed)
                 return {
                     "provider_id": self.provider_id,
