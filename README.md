@@ -70,6 +70,8 @@ Legal applicability is fact-specific. Do not infer it solely from attendee natio
 
 ## Security and conformance
 
+See [Phase 2C.2 security review](SECURITY_REVIEW_2C2.md) for the latest security hardening findings and residual risks.
+
 See [Phase 2C.1 repository audit](RELEASE_READINESS_AUDIT.md) for the latest release-readiness findings and remaining verification boundaries.
 
 See [SECURITY.md](SECURITY.md) for retrieval and data-handling boundaries and [COMPATIBILITY.md](COMPATIBILITY.md) for verified versus unverified integrations. Exa/Firecrawl tests use mocked REST fixtures; they are not live-provider certifications or agent-runtime compatibility claims.
