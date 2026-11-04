@@ -98,6 +98,8 @@ class JsonSearchAdapter:
         for attempt in range(self.max_retries + 1):
             try:
                 response = self.transport(self.base_url, headers, body, self.timeout)
+                LOGGER.debug("provider_request provider=%s attempt=%s status=%s",
+                             self.provider_id, attempt + 1, response.status)
                 if response.status == 429 or response.status in {408, 500, 502, 503, 504}:
                     raise ProviderError(self.provider_id, f"Transient HTTP {response.status}",
                                         status_code=response.status, retryable=True)
@@ -121,6 +123,14 @@ class JsonSearchAdapter:
                 last_error = exc
                 if not exc.retryable or attempt >= self.max_retries:
                     raise
+                self.sleep(min(2 ** attempt, 8))
+            except (TimeoutError, OSError) as exc:
+                last_error = ProviderError(self.provider_id, type(exc).__name__,
+                                           retryable=True)
+                if attempt >= self.max_retries:
+                    raise last_error from exc
+                LOGGER.warning("provider_transport_retry provider=%s attempt=%s error=%s",
+                               self.provider_id, attempt + 1, type(exc).__name__)
                 self.sleep(min(2 ** attempt, 8))
         assert last_error is not None
         raise last_error
