@@ -1,108 +1,36 @@
-# Evidence Specification
+# Evidence Specification v2
 
-**Status:** Draft specification  
-**Purpose:** Define provenance, source quality, claim support and uncertainty.
+## Distinct entities
+Source, Retrieval, Evidence, Claim, LegalAuthority, LegalProposition, Assessment, and Finding are separate. Organizer content is not legal authority; law does not prove organizer conduct.
 
-## 1. Evidence model
+## Provenance
+Evidence identifies retrieval, exact excerpt/observation, locator, original language, capture time, and content hash where available. Preserve context and redact unnecessary personal data.
 
-A report claim MUST be traceable to one or more evidence records. Evidence records and findings are separate entities: a source may support multiple claims, and a claim may require multiple sources.
+## Claims and corroboration
+A Claim is a factual proposition linked to evidence IDs. Record support, contradiction, qualification, or context. Multiple providers finding the same page are not independent corroboration.
 
-### 1.1 Evidence record fields
+## Legal authorities and propositions
+LegalAuthority records type, jurisdiction, title, issuing body, citation, dates, official URL, language, and retrieval. LegalProposition extracts a specific rule and references authorities/provisions. Distinguish binding law, court interpretation, regulator guidance, and commentary.
 
-Minimum recommended fields:
+## Translation and assessment
+Preserve original text/language. Record target language, method, provider, timestamp, reviewer/verification state, and limitations. Machine translation is not authoritative legal text. Assessment links claims, evidence, legal propositions, reasoning, outcome, confidence, and limitations. Confidence measures evidentiary support, not severity or applicability.
 
-| Field | Meaning |
-|---|---|
-| `evidence_id` | Stable unique identifier |
-| `source_id` | Link to source registry record |
-| `claim_supported` | Proposition the evidence is used to assess |
-| `locator` | Page, section, paragraph, timestamp or fragment |
-| `excerpt` | Short relevant quotation or faithful paraphrase |
-| `language` | Language of original material |
-| `retrieved_at` | Timestamp with timezone |
-| `published_at` | Publication date, if known |
-| `effective_from/to` | Applicable period, if known |
-| `source_role` | Legal authority, policy, operational material, etc. |
-| `support_type` | Supports, contradicts, qualifies or contextualizes |
-| `limitations` | Missing context, stale content, ambiguity, access limits |
-| `integrity` | Hash or snapshot reference when feasible |
+## Shared contract
+Schema dialect: JSON Schema Draft 2020-12; contract version 1.0.0. IDs are stable opaque strings. Timestamps use RFC 3339 with timezone.
 
-## 2. Source provenance
+Entity graph: Source → Retrieval → Evidence → Claim → Assessment → Finding; LegalAuthority → LegalProposition → Assessment. Organizer statements are not legal authorities; legal authority does not prove organizer conduct.
 
-A source record SHOULD preserve:
-- canonical and final URL;
-- title and issuing organization;
-- source class and authority type;
-- content type;
-- original language;
-- publication/update/effective dates;
-- retrieval timestamp and method;
-- provider/adapter;
-- redirect chain where material;
-- archived/snapshot location or hash where permitted.
+Distinct status namespaces:
+- Workflow: not_started, in_progress, completed, partial, blocked, not_applicable.
+- Assessment: supported_concern, no_issue_observed, needs_clarification, not_assessed, not_applicable.
+- Applicability: applicable_supported, potentially_applicable, not_established, not_applicable_supported, not_assessed.
+- Research task: queued, running, completed, partial, blocked, failed, cancelled.
+- Research attempt: succeeded, no_results, failed, rate_limited, blocked, skipped.
+- Human review: not_required, pending, in_review, changes_requested, accepted, rejected, stale.
+- Severity: critical, high, moderate, low, informational. Confidence: low, medium, high.
 
-Do not treat the retrieval provider as the source author.
+Never conflate these namespaces. Severity and confidence are independent.
 
-## 3. Claim-to-evidence relationship
+Legal applicability is assessed per regime, actor, activity, territorial/material scope, thresholds, and exemptions. Nationality or website accessibility alone is insufficient. Search results are discovery leads, not legal evidence. Missing clauses, failed searches, and inaccessible pages do not prove non-compliance. Preserve original-language material and translation provenance. Reports are preliminary review aids, not legal advice, opinions, certifications, or guarantees.
 
-For each material factual or legal proposition:
-- state the claim narrowly;
-- link supporting evidence;
-- link contrary or qualifying evidence;
-- identify whether the claim is directly stated or inferred;
-- explain the inference;
-- record confidence and limitations.
-
-A source that merely mentions a topic does not necessarily support a specific conclusion. Search snippets are discovery leads, not final evidence.
-
-## 4. Authority hierarchy
-
-Authority depends on the proposition being tested:
-- binding legislation and court decisions for legal rules;
-- official regulator material for regulator position/guidance;
-- signed terms/contracts and official policies for contractual or operational statements;
-- official event/venue pages for public representations;
-- secondary commentary for context;
-- social media and forums for leads or attributed observations only.
-
-Do not collapse all “official” material into one legal authority tier.
-
-## 5. Confidence model
-
-Confidence is an assessment of evidence quality, not probability:
-- **High:** direct, current, authoritative and clearly relevant; corroboration where appropriate.
-- **Medium:** credible and relevant but incomplete, indirect or limited.
-- **Low:** ambiguous, stale, unverified or weakly connected.
-
-Record why confidence was assigned. Conflicting sources should be preserved and explained, not silently resolved.
-
-## 6. Translation provenance
-
-For translated material, record:
-- original text or source reference;
-- original language;
-- target language;
-- translation provider/tool and version if known;
-- translation timestamp;
-- whether machine or human translated;
-- reviewer status;
-- terms whose meaning is legally material.
-
-Machine translation MUST NOT silently replace the original. Material legal wording requires qualified review.
-
-## 7. Evidence handling and privacy
-
-Collect only the minimum excerpt necessary. Respect copyright; do not reproduce entire policies or large source passages. Redact personal data not required for the claim. Avoid storing attendee lists, identity documents, private messages or sensitive information unless explicitly necessary, authorized and governed by a documented retention basis.
-
-Evidence snapshots MUST be access-controlled and retention-limited. Logs MUST NOT contain secrets.
-
-## 8. Validation rules
-
-A material finding cannot be marked evidence-supported unless:
-- at least one valid evidence ID is linked;
-- the cited locator is usable;
-- the evidence supports the stated proposition;
-- source identity and retrieval time are present or explicitly unknown;
-- limitations and contrary evidence are considered.
-
-If no evidence is available, use an appropriate clarification/not-assessed status rather than inventing support.
+Versioning: major may break; minor adds backward-compatible optional fields; patch clarifies without changing intended meaning. Migrations are explicit, deterministic, tested, and never silently discard unknown fields. Semantic reference validation supplements JSON Schema.

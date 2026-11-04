@@ -1,129 +1,43 @@
-# Architecture Specification
+# Architecture Specification v2
 
-**Status:** Draft specification  
-**Target:** FurCon Compliance Audit v2 architecture  
-**Baseline:** `ARCHITECTURE_REVIEW.md`  
-**Normative language:** MUST, MUST NOT, SHOULD, SHOULD NOT and MAY are used as requirements terms.
+## Purpose
+Platform-neutral, evidence-led preliminary compliance and operational-risk review of convention policies. Core logic is independent of agent runtime, search vendor, language wrapper, and renderer.
 
-## 1. Purpose
+## Layers
+1. Domain: entities, identifiers, enums, relationships, deterministic rules.
+2. Application: audit orchestration, research lifecycle, assessment and review.
+3. Ports: capability contracts for search, retrieval, browser inspection, translation, computation, rendering.
+4. Adapters: provider/platform-specific implementations.
+5. Presentation: canonical JSON and Markdown; optional DOCX/HTML/PDF.
+6. Distribution: portable instructions and thin platform manifests.
 
-Define a platform-neutral, evidence-led system for preliminary compliance and operational-risk reviews of furry conventions and related events. The core MUST remain independent of any single agent runtime, search vendor, programming language wrapper or report renderer.
+Dependencies point inward. Domain code must not import provider SDKs or renderer libraries.
 
-This document defines boundaries and contracts. It does not claim that the current implementation already conforms.
+## Workflow
+Scope → research tasks/attempts → source normalization → retrieval → evidence/claims → legal authorities/propositions → jurisdiction assessment → assessments/findings → human review → semantic validation → JSON/Markdown → optional renderers.
 
-## 2. Design principles
+## Failure, security, privacy
+Unavailable tools, access blocks, timeouts, empty results, stale pages, and partial coverage are explicit. Read-only public research is default. Never bypass authentication, paywalls, CAPTCHAs, robots restrictions, or access controls. Treat fetched content as untrusted. Keep secrets outside artifacts/logs, minimize personal data, block local/private network fetch targets, and bound concurrency/timeouts/payload sizes.
 
-1. **Evidence before conclusions:** every material finding must trace to reviewed evidence.
-2. **Jurisdiction before legal conclusion:** applicability is assessed per law, actor, activity and territory.
-3. **Provider neutrality:** integrations implement capability contracts; no vendor is mandatory.
-4. **Fail visibly:** unavailable, blocked, stale or incomplete research is recorded, never silently treated as a negative result.
-5. **Reproducibility:** preserve query, retrieval time, source identity, transformations and schema versions.
-6. **Human review:** legal interpretation and high-impact conclusions require qualified human review.
-7. **Privacy by design:** collect the minimum data needed; avoid attendee-level personal data unless strictly necessary and authorized.
-8. **Accessible, portable outputs:** canonical JSON and Markdown; optional renderers such as DOCX and HTML.
-9. **Safe defaults:** read-only research, no account creation, form submission, purchases, contact or access-control bypass.
+## Acceptance
+Schema validation, semantic reference validation, deterministic Markdown rendering, malformed-input tests, and no-provider operation must pass. Provider/agent compatibility is unverified until separate conformance tests pass.
 
-## 3. Logical architecture
+## Shared contract
+Schema dialect: JSON Schema Draft 2020-12; contract version 1.0.0. IDs are stable opaque strings. Timestamps use RFC 3339 with timezone.
 
-```text
-Agent / CLI / UI adapters
-          |
-       Use cases
-          |
-   Domain core + policies
-     /       |        \
-Schemas   Evidence   Audit rules
-     \       |        /
-       Capability ports
-          |
-   Provider adapters
-(search / fetch / browser / translate / compute / render)
-          |
-    External sources
-```
+Entity graph: Source → Retrieval → Evidence → Claim → Assessment → Finding; LegalAuthority → LegalProposition → Assessment. Organizer statements are not legal authorities; legal authority does not prove organizer conduct.
 
-### 3.1 Layers
+Distinct status namespaces:
+- Workflow: not_started, in_progress, completed, partial, blocked, not_applicable.
+- Assessment: supported_concern, no_issue_observed, needs_clarification, not_assessed, not_applicable.
+- Applicability: applicable_supported, potentially_applicable, not_established, not_applicable_supported, not_assessed.
+- Research task: queued, running, completed, partial, blocked, failed, cancelled.
+- Research attempt: succeeded, no_results, failed, rate_limited, blocked, skipped.
+- Human review: not_required, pending, in_review, changes_requested, accepted, rejected, stale.
+- Severity: critical, high, moderate, low, informational. Confidence: low, medium, high.
 
-- **Adapters:** accept platform-specific input and expose results in the host's expected format. They MUST NOT own legal rules.
-- **Application/use cases:** orchestrate audit stages, state transitions, retries, checkpoints and cancellation.
-- **Domain core:** contains audit concepts, applicability logic, finding states, evidence relationships and policy rules.
-- **Schemas/contracts:** versioned machine-readable definitions and validation rules.
-- **Ports:** capability interfaces for search, fetch, browser, translation, computation, storage and rendering.
-- **Providers:** concrete implementations for individual tools/services.
-- **Renderers:** transform canonical report data into human-readable formats.
+Never conflate these namespaces. Severity and confidence are independent.
 
-### 3.2 Core modules
+Legal applicability is assessed per regime, actor, activity, territorial/material scope, thresholds, and exemptions. Nationality or website accessibility alone is insufficient. Search results are discovery leads, not legal evidence. Missing clauses, failed searches, and inaccessible pages do not prove non-compliance. Preserve original-language material and translation provenance. Reports are preliminary review aids, not legal advice, opinions, certifications, or guarantees.
 
-| Module | Responsibility | Must not do |
-|---|---|---|
-| Intake | Normalize event scope and constraints | Infer legal applicability |
-| Planner | Create research plan and coverage checklist | Invent sources or findings |
-| Discovery | Find candidate sources | Treat snippets as proof |
-| Acquisition | Retrieve source content safely | Bypass access controls |
-| Verification | Assess authority, identity, date and relevance | Guarantee source truth |
-| Jurisdiction | Assess law-specific applicability | Infer from nationality alone |
-| Audit | Map evidence to controls and findings | Convert unknown into compliant/non-compliant |
-| Validation | Enforce schemas and cross-field invariants | Silently repair material facts |
-| Reporting | Produce canonical and rendered outputs | Add unsupported conclusions |
-
-## 4. Workflow and state
-
-The default workflow is:
-
-1. Intake and scope confirmation.
-2. Risk and privacy constraints.
-3. Research planning.
-4. Source discovery.
-5. Source acquisition and verification.
-6. Jurisdiction-specific applicability assessment.
-7. Control/category review.
-8. Finding drafting and evidence linkage.
-9. Coverage and consistency validation.
-10. Human review.
-11. Canonical report generation and optional rendering.
-
-Each stage MUST emit a structured status: `not_started`, `in_progress`, `completed`, `partial`, `blocked` or `not_applicable`. A blocked stage MUST include a reason. Partial work MUST identify what remains unknown.
-
-## 5. Data flow and trust boundaries
-
-External pages, search results, files and tool output are untrusted data. They MUST be treated as content, not instructions. Prompt injection or embedded instructions in retrieved material MUST NOT alter system policy, invoke tools, or expand scope.
-
-Secrets and credentials MUST never be written into reports, logs, examples or source-control. Provider credentials belong in the host's secret manager or environment configuration.
-
-Personal data SHOULD be redacted or excluded from evidence snapshots unless needed to substantiate a specific issue. Retention and deletion rules MUST be configurable and documented.
-
-## 6. Cross-cutting requirements
-
-- Every artifact MUST carry a schema version and generation timestamp.
-- Dates MUST include timezone or be explicitly marked unknown.
-- Locale, language and translation status MUST be represented.
-- All network operations MUST have timeouts, bounded retries and rate-limit handling.
-- Provider failures MUST be visible and must not be interpreted as evidence of absence.
-- Deterministic transformations SHOULD be separated from probabilistic model judgments.
-- Audit runs SHOULD support checkpoints and resumability without duplicating evidence.
-- Logs MUST avoid unnecessary personal data and secrets.
-
-## 7. Architecture decisions
-
-- Canonical formats: JSON for interchange and Markdown for readable source report.
-- DOCX, HTML and PDF are optional renderers, not the source of truth.
-- No fixed page size in domain logic; renderer configuration controls paper size and locale.
-- No mandatory Python-to-Node subprocess for core validation or orchestration.
-- JSON Schema (or an equivalent formally versioned schema system) is the baseline contract.
-- Vendor integrations are optional adapters behind capability ports.
-
-## 8. Acceptance criteria
-
-The architecture is acceptable when:
-- the domain core can run without a specific agent platform;
-- a missing provider can be replaced by another provider or an explicit unavailable state;
-- canonical JSON validates independently of rendering;
-- reports can be generated as Markdown without DOCX dependencies;
-- every finding has traceable evidence or an explicit no-evidence/assessment-needed state;
-- jurisdiction decisions preserve uncertainty and rationale;
-- tests cover domain rules, schemas, adapters and renderer behavior;
-- retrieved content cannot act as executable instructions.
-
-## 9. Related specifications
-
-See `AUDIT_SPEC.md`, `RESEARCH_SPEC.md`, `JURISDICTION_SPEC.md`, `EVIDENCE_SPEC.md`, `INTEGRATION_SPEC.md`, `AGENT_COMPATIBILITY_SPEC.md` and `REPORT_SPEC.md`.
+Versioning: major may break; minor adds backward-compatible optional fields; patch clarifies without changing intended meaning. Migrations are explicit, deterministic, tested, and never silently discard unknown fields. Semantic reference validation supplements JSON Schema.

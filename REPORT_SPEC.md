@@ -1,124 +1,36 @@
-# Report Specification
+# Report Specification v2
 
-**Status:** Draft specification  
-**Purpose:** Define canonical report structure, validation and optional output renderers.
+## Canonical artifacts
+JSON is canonical machine data; Markdown is canonical human-readable source. DOCX, HTML, PDF are optional renderers. Renderers cannot add findings, change statuses, omit material limitations, or imply legal advice.
 
-## 1. Canonical output
+## Contents and relationships
+Report includes IDs/version, event, scope, generation metadata, research tasks/attempts, source registry, retrievals, evidence, claims, legal authorities/propositions, jurisdiction assessments, assessments, findings, human reviews, limitations, unresolved questions, and timestamp. All references use stable IDs. Findings link to assessments/jurisdiction assessments; do not embed duplicate jurisdiction objects.
 
-JSON is the canonical machine-readable artifact. Markdown is the canonical human-readable source report. DOCX, HTML and PDF are optional renderings generated from validated canonical data.
+## Narrative sections
+Scope/event context; methodology and labels; research coverage/discovery trail; jurisdiction applicability; category assessments/findings; supporting/contrary evidence; human review/unresolved questions; source/evidence register.
 
-A renderer MUST NOT introduce new findings, alter applicability statuses or silently omit material limitations.
+## Validation
+Draft 2020-12 plus semantic checks: unique IDs, resolved references, evidence-backed supported findings, rationale and authority references for supported applicability, reasons for partial/blocked research, timezone-aware timestamps, scope/limitations, and review freshness.
 
-## 2. Top-level report structure
+## Renderers and versioning
+Markdown works offline. Optional renderers consume validated data only. Page size, margins, language, and styles are configurable. Renderer failure does not invalidate JSON/Markdown. Breaking changes require major schema version and tested migration; unknown fields are not silently dropped.
 
-Recommended top-level fields:
+## Shared contract
+Schema dialect: JSON Schema Draft 2020-12; contract version 1.0.0. IDs are stable opaque strings. Timestamps use RFC 3339 with timezone.
 
-- `schema_version`
-- `report_id`
-- `audit_id`
-- `event`
-- `organizers`
-- `scope`
-- `audit_metadata`
-- `jurisdiction_assessments`
-- `category_assessments`
-- `findings`
-- `source_registry`
-- `evidence_records`
-- `research_trail`
-- `limitations`
-- `unresolved_questions`
-- `human_review`
-- `generated_at`
+Entity graph: Source → Retrieval → Evidence → Claim → Assessment → Finding; LegalAuthority → LegalProposition → Assessment. Organizer statements are not legal authorities; legal authority does not prove organizer conduct.
 
-All timestamps MUST use ISO 8601 with timezone. Unknown values should be null or an explicit unknown state, not guessed.
+Distinct status namespaces:
+- Workflow: not_started, in_progress, completed, partial, blocked, not_applicable.
+- Assessment: supported_concern, no_issue_observed, needs_clarification, not_assessed, not_applicable.
+- Applicability: applicable_supported, potentially_applicable, not_established, not_applicable_supported, not_assessed.
+- Research task: queued, running, completed, partial, blocked, failed, cancelled.
+- Research attempt: succeeded, no_results, failed, rate_limited, blocked, skipped.
+- Human review: not_required, pending, in_review, changes_requested, accepted, rejected, stale.
+- Severity: critical, high, moderate, low, informational. Confidence: low, medium, high.
 
-## 3. Finding structure
+Never conflate these namespaces. Severity and confidence are independent.
 
-Each finding SHOULD include:
-- stable finding ID;
-- title and concise description;
-- category/control reference;
-- affected actor/activity;
-- assessment status;
-- severity and rationale;
-- confidence and rationale;
-- jurisdiction assessment references, if relevant;
-- criterion or requirement and its source;
-- supporting evidence IDs;
-- contrary/qualifying evidence IDs;
-- recommendation;
-- unresolved questions;
-- human-review status.
+Legal applicability is assessed per regime, actor, activity, territorial/material scope, thresholds, and exemptions. Nationality or website accessibility alone is insufficient. Search results are discovery leads, not legal evidence. Missing clauses, failed searches, and inaccessible pages do not prove non-compliance. Preserve original-language material and translation provenance. Reports are preliminary review aids, not legal advice, opinions, certifications, or guarantees.
 
-Findings MUST distinguish observed facts from analysis and recommendations.
-
-## 4. Research trail
-
-The report MUST include a Source Discovery Trail generated from structured research records. It SHOULD show:
-- research task and question;
-- query/provider/timestamp;
-- candidate source and disposition;
-- retrieval status;
-- verification outcome;
-- reason for exclusion or unresolved state.
-
-Do not expose secrets, private query data or unnecessary personal information.
-
-## 5. Report sections
-
-A readable report SHOULD contain:
-
-1. Cover and report metadata.
-2. Executive summary with scope and limitations.
-3. Event and organizer context.
-4. Methodology and assessment labels.
-5. Jurisdiction applicability summary.
-6. Category-by-category assessment.
-7. Findings and recommendations.
-8. Source Discovery Trail.
-9. Evidence/source register.
-10. Unresolved questions and human-review items.
-11. Appendices and glossary, where useful.
-
-The executive summary MUST NOT imply a complete legal compliance determination.
-
-## 6. Validation
-
-Validate JSON against a versioned schema and run semantic checks, including:
-- unique IDs;
-- all referenced evidence/source IDs exist;
-- each finding has a valid status;
-- severity and confidence use separate enumerations;
-- jurisdiction references resolve;
-- dates are well-formed;
-- required rationale exists for applicability decisions;
-- no finding marked supported lacks evidence;
-- partial/blocked research has a reason;
-- report scope and limitations are present.
-
-Schema validation alone is not sufficient; cross-reference and semantic validation are required.
-
-## 7. Renderer requirements
-
-- **Markdown:** must be available without external document-generation dependencies.
-- **DOCX:** optional; paper size, margins, language and styles configurable.
-- **HTML:** optional; semantic structure and accessible headings.
-- **PDF:** optional; generated from a validated source artifact with selectable text where feasible.
-
-Renderers MUST support long URLs, multilingual text, tables and pagination without assuming US Letter. Renderer failure must not invalidate canonical JSON/Markdown.
-
-## 8. Versioning and migration
-
-Every report declares its schema version. Breaking field or semantic changes require a major schema version and migration guidance. Migrations MUST be explicit and tested; unknown fields must not be silently discarded.
-
-## 9. Distribution checklist
-
-Before release:
-- canonical JSON validates;
-- Markdown contains all required sections;
-- source and evidence references resolve;
-- renderer output is checked for truncation and layout defects;
-- limitations and human-review status are visible;
-- no personal data or secrets leak;
-- output format and schema version are declared.
+Versioning: major may break; minor adds backward-compatible optional fields; patch clarifies without changing intended meaning. Migrations are explicit, deterministic, tested, and never silently discard unknown fields. Semantic reference validation supplements JSON Schema.

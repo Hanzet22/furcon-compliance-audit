@@ -1,90 +1,45 @@
-# Agent Compatibility Specification
+# Agent Compatibility Specification v2
 
-**Status:** Draft specification  
-**Purpose:** Portable distribution across agent runtimes and coding assistants.
+## Portable core
+Schemas, domain rules, tests, examples, capability contracts, and instructions are platform-neutral. Platform manifests, hooks, commands, and tool mappings belong in thin adapters.
 
-## 1. Compatibility objective
+## Agent behavior
+Confirm scope; use authorized capabilities; distinguish discovery from evidence; preserve provenance/uncertainty; assess applicability per regime; separate status/severity/confidence; validate outputs; escalate high-impact issues. Never fabricate sources, law, tool results, test results, or repository state.
 
-Keep audit methodology and domain contracts independent of a specific agent platform. Platform-specific packaging belongs in thin adapters and manifests.
+## Permission tiers
+Read-only research; local processing; external side effects. External side effects require separate explicit authorization and may remain disallowed.
 
-## 2. Portable core
+## Conformance
+For each host/version record date, adapter revision, environment, tests, results, and limitations. Test skill discovery, metadata parsing, capability mapping, input/output, unavailable-tool fallback, errors, provenance, prompt-injection fixtures, and schema-valid output.
 
-The portable core consists of:
-- this specification set;
-- versioned schemas;
-- deterministic validation and domain rules;
-- provider capability contracts;
-- prompt/workflow instructions expressed without vendor-only metadata;
-- test fixtures and examples.
+Labels: Planned (not tested), Partially tested (gaps stated), Tested (all required tests pass on documented version), Unsupported (known incompatibility).
 
-The core MUST remain usable when no optional provider is connected. Missing capabilities must produce explicit unavailable states.
+| Host | Status |
+|---|---|
+| Claude Code | Planned / not tested |
+| Codex | Planned / not tested |
+| Cursor | Planned / not tested |
+| Hermes | Planned / not tested |
+| Agent Skills-compatible hosts | Planned / not tested |
 
-## 3. Platform adapters
+Never claim universal support without reproducible tests.
 
-Adapters MAY include platform-native manifests, tool declarations, slash commands, hooks or skill metadata. Each adapter MUST:
-- declare supported platform and tested version range;
-- map platform tools to internal capability contracts;
-- document required permissions;
-- avoid duplicating legal methodology;
-- preserve canonical output schemas;
-- declare unsupported features and fallbacks.
+## Shared contract
+Schema dialect: JSON Schema Draft 2020-12; contract version 1.0.0. IDs are stable opaque strings. Timestamps use RFC 3339 with timezone.
 
-Custom frontmatter fields such as `triggers` or `requires_tools` MUST NOT be assumed to be universally understood. Put portable requirements in ordinary documentation and platform-specific metadata in the relevant adapter.
+Entity graph: Source → Retrieval → Evidence → Claim → Assessment → Finding; LegalAuthority → LegalProposition → Assessment. Organizer statements are not legal authorities; legal authority does not prove organizer conduct.
 
-## 4. Agent behavior contract
+Distinct status namespaces:
+- Workflow: not_started, in_progress, completed, partial, blocked, not_applicable.
+- Assessment: supported_concern, no_issue_observed, needs_clarification, not_assessed, not_applicable.
+- Applicability: applicable_supported, potentially_applicable, not_established, not_applicable_supported, not_assessed.
+- Research task: queued, running, completed, partial, blocked, failed, cancelled.
+- Research attempt: succeeded, no_results, failed, rate_limited, blocked, skipped.
+- Human review: not_required, pending, in_review, changes_requested, accepted, rejected, stale.
+- Severity: critical, high, moderate, low, informational. Confidence: low, medium, high.
 
-An agent using this skill MUST:
-1. Confirm scope and material assumptions.
-2. Use only available, authorized capabilities.
-3. Distinguish discovery from verified evidence.
-4. Record research queries and retrieval outcomes.
-5. Assess applicability per legal regime and activity.
-6. Separate assessment status, severity and confidence.
-7. Preserve uncertainty and contradictory evidence.
-8. Validate structured outputs before reporting.
-9. Identify when human specialist review is needed.
-10. Never claim certification or legal opinion.
+Never conflate these namespaces. Severity and confidence are independent.
 
-The agent MUST NOT fabricate sources, dates, legal provisions, provider results, test outcomes or repository state.
+Legal applicability is assessed per regime, actor, activity, territorial/material scope, thresholds, and exemptions. Nationality or website accessibility alone is insufficient. Search results are discovery leads, not legal evidence. Missing clauses, failed searches, and inaccessible pages do not prove non-compliance. Preserve original-language material and translation provenance. Reports are preliminary review aids, not legal advice, opinions, certifications, or guarantees.
 
-## 5. Tool permission tiers
-
-- **Read-only research:** search, fetch, browser inspection and document reading.
-- **Local processing:** schema validation, parsing, translation and rendering.
-- **External side effects:** account creation, submissions, purchases, messages, uploads or configuration changes.
-
-The default authorization covers only read-only research and local processing. External side effects require separate, explicit user authorization and may remain prohibited by the deployment policy.
-
-## 6. Platform matrix
-
-Maintain a tested matrix rather than asserting universal compatibility:
-
-| Platform | Adapter location | Manifest/version | Tested status |
-|---|---|---|---|
-| Claude Code | platform adapter | Record exact supported format | Not yet verified |
-| Codex | platform adapter | Record exact supported format | Not yet verified |
-| Cursor | platform adapter | Record exact supported format | Not yet verified |
-| Hermes | platform adapter | Record exact supported format | Not yet verified |
-| Agent Skills-compatible hosts | portable package | Record spec/version | Not yet verified |
-
-Do not label a platform “supported” until a reproducible smoke test passes on a documented version.
-
-## 7. Packaging and versioning
-
-- Version the portable core independently from platform adapters.
-- Document compatibility and breaking changes.
-- Pin or constrain provider dependencies in adapter manifests.
-- Keep secrets out of package files and examples.
-- Include license, attribution and security notes in every distribution package.
-- Provide a minimal no-provider mode for local schema validation and report drafting.
-
-## 8. Conformance tests
-
-A platform adapter conforms when it:
-- loads the correct instructions;
-- exposes only declared capabilities;
-- produces canonical schema-valid output;
-- handles unavailable tools without fabricating results;
-- preserves evidence provenance;
-- passes safety and prompt-injection fixtures;
-- documents platform-specific limitations.
+Versioning: major may break; minor adds backward-compatible optional fields; patch clarifies without changing intended meaning. Migrations are explicit, deterministic, tested, and never silently discard unknown fields. Semantic reference validation supplements JSON Schema.
