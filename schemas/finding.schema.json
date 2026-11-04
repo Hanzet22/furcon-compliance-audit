@@ -1,0 +1,171 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://hanzet22.github.io/furcon-compliance-audit/schemas/finding.schema.json",
+  "title": "finding",
+  "description": "Traceable finding.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": "1.0.0"
+    },
+    "finding_id": {
+      "$ref": "#/$defs/id"
+    },
+    "title": {
+      "type": "string"
+    },
+    "category": {
+      "type": "string"
+    },
+    "assessment_status": {
+      "$ref": "#/$defs/assessment"
+    },
+    "severity": {
+      "$ref": "#/$defs/severity"
+    },
+    "confidence": {
+      "$ref": "#/$defs/confidence"
+    },
+    "rationale": {
+      "type": "string"
+    },
+    "assessment_ids": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/id"
+      },
+      "uniqueItems": true
+    },
+    "jurisdiction_assessment_ids": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/id"
+      },
+      "uniqueItems": true
+    },
+    "supporting_evidence_ids": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/id"
+      },
+      "uniqueItems": true
+    },
+    "contrary_evidence_ids": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/id"
+      },
+      "uniqueItems": true
+    },
+    "recommendation": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "human_review_status": {
+      "$ref": "#/$defs/review"
+    }
+  },
+  "required": [
+    "schema_version",
+    "finding_id",
+    "title",
+    "category",
+    "assessment_status",
+    "severity",
+    "confidence",
+    "rationale",
+    "assessment_ids",
+    "jurisdiction_assessment_ids",
+    "supporting_evidence_ids",
+    "contrary_evidence_ids"
+  ],
+  "$defs": {
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_-]{2,63}$"
+    },
+    "ts": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "workflow": {
+      "enum": [
+        "not_started",
+        "in_progress",
+        "completed",
+        "partial",
+        "blocked",
+        "not_applicable"
+      ]
+    },
+    "assessment": {
+      "enum": [
+        "supported_concern",
+        "no_issue_observed",
+        "needs_clarification",
+        "not_assessed",
+        "not_applicable"
+      ]
+    },
+    "applicability": {
+      "enum": [
+        "applicable_supported",
+        "potentially_applicable",
+        "not_established",
+        "not_applicable_supported",
+        "not_assessed"
+      ]
+    },
+    "review": {
+      "enum": [
+        "not_required",
+        "pending",
+        "in_review",
+        "changes_requested",
+        "accepted",
+        "rejected",
+        "stale"
+      ]
+    },
+    "task": {
+      "enum": [
+        "queued",
+        "running",
+        "completed",
+        "partial",
+        "blocked",
+        "failed",
+        "cancelled"
+      ]
+    },
+    "attempt": {
+      "enum": [
+        "succeeded",
+        "no_results",
+        "failed",
+        "rate_limited",
+        "blocked",
+        "skipped"
+      ]
+    },
+    "severity": {
+      "enum": [
+        "critical",
+        "high",
+        "moderate",
+        "low",
+        "informational"
+      ]
+    },
+    "confidence": {
+      "enum": [
+        "low",
+        "medium",
+        "high"
+      ]
+    }
+  }
+}

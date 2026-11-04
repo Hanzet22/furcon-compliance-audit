@@ -1,0 +1,150 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://hanzet22.github.io/furcon-compliance-audit/schemas/legal-authority.schema.json",
+  "title": "legal-authority",
+  "description": "Legal material, distinct from event content.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": "1.0.0"
+    },
+    "authority_id": {
+      "$ref": "#/$defs/id"
+    },
+    "jurisdiction": {
+      "type": "string"
+    },
+    "authority_type": {
+      "enum": [
+        "legislation",
+        "regulation",
+        "court_decision",
+        "official_regulator_guidance",
+        "official_interpretation",
+        "secondary_commentary"
+      ]
+    },
+    "title": {
+      "type": "string"
+    },
+    "citation": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "issuing_body": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "official_url": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "uri"
+    },
+    "retrieval_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    }
+  },
+  "required": [
+    "schema_version",
+    "authority_id",
+    "jurisdiction",
+    "authority_type",
+    "title"
+  ],
+  "$defs": {
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_-]{2,63}$"
+    },
+    "ts": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "workflow": {
+      "enum": [
+        "not_started",
+        "in_progress",
+        "completed",
+        "partial",
+        "blocked",
+        "not_applicable"
+      ]
+    },
+    "assessment": {
+      "enum": [
+        "supported_concern",
+        "no_issue_observed",
+        "needs_clarification",
+        "not_assessed",
+        "not_applicable"
+      ]
+    },
+    "applicability": {
+      "enum": [
+        "applicable_supported",
+        "potentially_applicable",
+        "not_established",
+        "not_applicable_supported",
+        "not_assessed"
+      ]
+    },
+    "review": {
+      "enum": [
+        "not_required",
+        "pending",
+        "in_review",
+        "changes_requested",
+        "accepted",
+        "rejected",
+        "stale"
+      ]
+    },
+    "task": {
+      "enum": [
+        "queued",
+        "running",
+        "completed",
+        "partial",
+        "blocked",
+        "failed",
+        "cancelled"
+      ]
+    },
+    "attempt": {
+      "enum": [
+        "succeeded",
+        "no_results",
+        "failed",
+        "rate_limited",
+        "blocked",
+        "skipped"
+      ]
+    },
+    "severity": {
+      "enum": [
+        "critical",
+        "high",
+        "moderate",
+        "low",
+        "informational"
+      ]
+    },
+    "confidence": {
+      "enum": [
+        "low",
+        "medium",
+        "high"
+      ]
+    }
+  }
+}

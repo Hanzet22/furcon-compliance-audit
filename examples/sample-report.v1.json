@@ -1,0 +1,116 @@
+{
+  "schema_version": "1.0.0",
+  "report_id": "report_demo_001",
+  "audit_id": "audit_demo_001",
+  "event": {
+    "name": "Synthetic Fur Convention",
+    "year": 2027,
+    "location": "Unspecified"
+  },
+  "scope": {
+    "description": "Synthetic fixture only.",
+    "limitations": [
+      "All content is fictional test data."
+    ]
+  },
+  "research_tasks": [
+    {
+      "research_task_id": "task_demo_001",
+      "status": "completed"
+    }
+  ],
+  "research_attempts": [
+    {
+      "attempt_id": "attempt_demo_001",
+      "research_task_id": "task_demo_001",
+      "status": "succeeded",
+      "provider_id": "fixture",
+      "capability_id": "retrieve.page",
+      "started_at": "2026-11-05T00:00:00Z"
+    }
+  ],
+  "sources": [
+    {
+      "source_id": "source_demo_001",
+      "canonical_url": "https://example.org/terms",
+      "source_type": "unverified",
+      "verification_status": "unverified"
+    }
+  ],
+  "retrievals": [
+    {
+      "retrieval_id": "retrieval_demo_001",
+      "source_id": "source_demo_001",
+      "retrieved_at": "2026-11-05T00:00:01Z",
+      "outcome": "success"
+    }
+  ],
+  "evidence": [
+    {
+      "evidence_id": "evidence_demo_001",
+      "retrieval_id": "retrieval_demo_001",
+      "excerpt": "Synthetic excerpt."
+    }
+  ],
+  "claims": [
+    {
+      "claim_id": "claim_demo_001",
+      "statement": "Synthetic claim.",
+      "evidence_ids": [
+        "evidence_demo_001"
+      ]
+    }
+  ],
+  "legal_authorities": [],
+  "legal_propositions": [],
+  "jurisdiction_assessments": [
+    {
+      "jurisdiction_assessment_id": "jurisdiction_demo_001",
+      "applicability_status": "not_assessed",
+      "rationale": "No legal analysis represented."
+    }
+  ],
+  "assessments": [
+    {
+      "assessment_id": "assessment_demo_001",
+      "assessment_status": "needs_clarification",
+      "rationale": "Synthetic assessment.",
+      "confidence": "low",
+      "claim_ids": [
+        "claim_demo_001"
+      ],
+      "evidence_ids": [
+        "evidence_demo_001"
+      ],
+      "legal_proposition_ids": []
+    }
+  ],
+  "findings": [
+    {
+      "finding_id": "finding_demo_001",
+      "title": "Synthetic finding",
+      "category": "test",
+      "assessment_status": "needs_clarification",
+      "severity": "informational",
+      "confidence": "low",
+      "rationale": "Synthetic fixture.",
+      "assessment_ids": [
+        "assessment_demo_001"
+      ],
+      "jurisdiction_assessment_ids": [
+        "jurisdiction_demo_001"
+      ],
+      "supporting_evidence_ids": [
+        "evidence_demo_001"
+      ],
+      "contrary_evidence_ids": []
+    }
+  ],
+  "human_reviews": [],
+  "limitations": [
+    "Synthetic data only."
+  ],
+  "unresolved_questions": [],
+  "generated_at": "2026-11-05T00:00:02Z",
+  "report_revision": "fixture-1"
+}

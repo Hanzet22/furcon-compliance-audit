@@ -1,0 +1,591 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://hanzet22.github.io/furcon-compliance-audit/schemas/report.schema.json",
+  "title": "report",
+  "description": "Canonical report envelope.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": "1.0.0"
+    },
+    "report_id": {
+      "$ref": "#/$defs/id"
+    },
+    "audit_id": {
+      "$ref": "#/$defs/id"
+    },
+    "event": {
+      "type": "object",
+      "required": [
+        "name"
+      ],
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "year": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "location": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "scope": {
+      "type": "object",
+      "required": [
+        "description"
+      ],
+      "properties": {
+        "description": {
+          "type": "string"
+        },
+        "limitations": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "research_tasks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "research_task_id": {
+            "$ref": "#/$defs/id"
+          },
+          "status": {
+            "$ref": "#/$defs/task"
+          },
+          "blocked_reason": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "research_task_id",
+          "status"
+        ],
+        "additionalProperties": true
+      }
+    },
+    "research_attempts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "attempt_id": {
+            "$ref": "#/$defs/id"
+          },
+          "research_task_id": {
+            "$ref": "#/$defs/id"
+          },
+          "status": {
+            "$ref": "#/$defs/attempt"
+          },
+          "provider_id": {
+            "type": "string"
+          },
+          "capability_id": {
+            "type": "string"
+          },
+          "started_at": {
+            "$ref": "#/$defs/ts"
+          },
+          "ended_at": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "attempt_id",
+          "research_task_id",
+          "status",
+          "provider_id",
+          "capability_id",
+          "started_at"
+        ],
+        "additionalProperties": true
+      }
+    },
+    "sources": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "source_id": {
+            "$ref": "#/$defs/id"
+          },
+          "canonical_url": {
+            "type": "string",
+            "format": "uri"
+          },
+          "source_type": {
+            "type": "string"
+          },
+          "verification_status": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "source_id",
+          "canonical_url",
+          "source_type",
+          "verification_status"
+        ],
+        "additionalProperties": true
+      }
+    },
+    "retrievals": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "retrieval_id": {
+            "$ref": "#/$defs/id"
+          },
+          "source_id": {
+            "$ref": "#/$defs/id"
+          },
+          "retrieved_at": {
+            "$ref": "#/$defs/ts"
+          },
+          "outcome": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "retrieval_id",
+          "source_id",
+          "retrieved_at",
+          "outcome"
+        ],
+        "additionalProperties": true
+      }
+    },
+    "evidence": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "evidence_id": {
+            "$ref": "#/$defs/id"
+          },
+          "retrieval_id": {
+            "$ref": "#/$defs/id"
+          },
+          "excerpt": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "evidence_id",
+          "retrieval_id",
+          "excerpt"
+        ],
+        "additionalProperties": true
+      }
+    },
+    "claims": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "claim_id": {
+            "$ref": "#/$defs/id"
+          },
+          "statement": {
+            "type": "string"
+          },
+          "evidence_ids": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/id"
+            },
+            "uniqueItems": true
+          }
+        },
+        "required": [
+          "claim_id",
+          "statement",
+          "evidence_ids"
+        ],
+        "additionalProperties": true
+      }
+    },
+    "legal_authorities": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "authority_id": {
+            "$ref": "#/$defs/id"
+          },
+          "jurisdiction": {
+            "type": "string"
+          },
+          "authority_type": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "authority_id",
+          "jurisdiction",
+          "authority_type",
+          "title"
+        ],
+        "additionalProperties": true
+      }
+    },
+    "legal_propositions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "proposition_id": {
+            "$ref": "#/$defs/id"
+          },
+          "authority_ids": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/id"
+            },
+            "uniqueItems": true
+          }
+        },
+        "required": [
+          "proposition_id",
+          "authority_ids"
+        ],
+        "additionalProperties": true
+      }
+    },
+    "jurisdiction_assessments": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "jurisdiction_assessment_id": {
+            "$ref": "#/$defs/id"
+          },
+          "applicability_status": {
+            "$ref": "#/$defs/applicability"
+          },
+          "rationale": {
+            "type": "string"
+          },
+          "legal_proposition_ids": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/id"
+            },
+            "uniqueItems": true
+          }
+        },
+        "required": [
+          "jurisdiction_assessment_id",
+          "applicability_status",
+          "rationale"
+        ],
+        "additionalProperties": true
+      }
+    },
+    "assessments": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "assessment_id": {
+            "$ref": "#/$defs/id"
+          },
+          "assessment_status": {
+            "$ref": "#/$defs/assessment"
+          },
+          "rationale": {
+            "type": "string"
+          },
+          "confidence": {
+            "$ref": "#/$defs/confidence"
+          },
+          "claim_ids": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/id"
+            },
+            "uniqueItems": true
+          },
+          "evidence_ids": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/id"
+            },
+            "uniqueItems": true
+          },
+          "legal_proposition_ids": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/id"
+            },
+            "uniqueItems": true
+          }
+        },
+        "required": [
+          "assessment_id",
+          "assessment_status",
+          "rationale",
+          "confidence"
+        ],
+        "additionalProperties": true
+      }
+    },
+    "findings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "finding_id": {
+            "$ref": "#/$defs/id"
+          },
+          "title": {
+            "type": "string"
+          },
+          "category": {
+            "type": "string"
+          },
+          "assessment_status": {
+            "$ref": "#/$defs/assessment"
+          },
+          "severity": {
+            "$ref": "#/$defs/severity"
+          },
+          "confidence": {
+            "$ref": "#/$defs/confidence"
+          },
+          "rationale": {
+            "type": "string"
+          },
+          "assessment_ids": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/id"
+            },
+            "uniqueItems": true
+          },
+          "jurisdiction_assessment_ids": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/id"
+            },
+            "uniqueItems": true
+          },
+          "supporting_evidence_ids": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/id"
+            },
+            "uniqueItems": true
+          },
+          "contrary_evidence_ids": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/id"
+            },
+            "uniqueItems": true
+          }
+        },
+        "required": [
+          "finding_id",
+          "assessment_status",
+          "severity",
+          "confidence",
+          "assessment_ids",
+          "jurisdiction_assessment_ids",
+          "supporting_evidence_ids",
+          "contrary_evidence_ids"
+        ],
+        "additionalProperties": true
+      }
+    },
+    "human_reviews": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "review_id": {
+            "$ref": "#/$defs/id"
+          },
+          "target_ids": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/id"
+            },
+            "uniqueItems": true
+          },
+          "review_status": {
+            "$ref": "#/$defs/review"
+          },
+          "reviewed_at": {
+            "$ref": "#/$defs/ts"
+          },
+          "revision": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "review_id",
+          "target_ids",
+          "review_status",
+          "reviewed_at",
+          "revision"
+        ],
+        "additionalProperties": true
+      }
+    },
+    "limitations": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "minItems": 1
+    },
+    "unresolved_questions": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "generated_at": {
+      "$ref": "#/$defs/ts"
+    },
+    "report_revision": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "schema_version",
+    "report_id",
+    "audit_id",
+    "event",
+    "scope",
+    "research_tasks",
+    "research_attempts",
+    "sources",
+    "retrievals",
+    "evidence",
+    "claims",
+    "legal_authorities",
+    "legal_propositions",
+    "jurisdiction_assessments",
+    "assessments",
+    "findings",
+    "human_reviews",
+    "limitations",
+    "unresolved_questions",
+    "generated_at"
+  ],
+  "$defs": {
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_-]{2,63}$"
+    },
+    "ts": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "workflow": {
+      "enum": [
+        "not_started",
+        "in_progress",
+        "completed",
+        "partial",
+        "blocked",
+        "not_applicable"
+      ]
+    },
+    "assessment": {
+      "enum": [
+        "supported_concern",
+        "no_issue_observed",
+        "needs_clarification",
+        "not_assessed",
+        "not_applicable"
+      ]
+    },
+    "applicability": {
+      "enum": [
+        "applicable_supported",
+        "potentially_applicable",
+        "not_established",
+        "not_applicable_supported",
+        "not_assessed"
+      ]
+    },
+    "review": {
+      "enum": [
+        "not_required",
+        "pending",
+        "in_review",
+        "changes_requested",
+        "accepted",
+        "rejected",
+        "stale"
+      ]
+    },
+    "task": {
+      "enum": [
+        "queued",
+        "running",
+        "completed",
+        "partial",
+        "blocked",
+        "failed",
+        "cancelled"
+      ]
+    },
+    "attempt": {
+      "enum": [
+        "succeeded",
+        "no_results",
+        "failed",
+        "rate_limited",
+        "blocked",
+        "skipped"
+      ]
+    },
+    "severity": {
+      "enum": [
+        "critical",
+        "high",
+        "moderate",
+        "low",
+        "informational"
+      ]
+    },
+    "confidence": {
+      "enum": [
+        "low",
+        "medium",
+        "high"
+      ]
+    }
+  }
+}

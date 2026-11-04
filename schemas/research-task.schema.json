@@ -1,0 +1,136 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://hanzet22.github.io/furcon-compliance-audit/schemas/research-task.schema.json",
+  "title": "research-task",
+  "description": "Bounded research task.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": "1.0.0"
+    },
+    "research_task_id": {
+      "$ref": "#/$defs/id"
+    },
+    "audit_id": {
+      "$ref": "#/$defs/id"
+    },
+    "objective": {
+      "type": "string"
+    },
+    "completion_criteria": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "minItems": 1
+    },
+    "status": {
+      "$ref": "#/$defs/task"
+    },
+    "created_at": {
+      "$ref": "#/$defs/ts"
+    },
+    "blocked_reason": {
+      "type": [
+        "string",
+        "null"
+      ]
+    }
+  },
+  "required": [
+    "schema_version",
+    "research_task_id",
+    "audit_id",
+    "objective",
+    "completion_criteria",
+    "status",
+    "created_at"
+  ],
+  "$defs": {
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_-]{2,63}$"
+    },
+    "ts": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "workflow": {
+      "enum": [
+        "not_started",
+        "in_progress",
+        "completed",
+        "partial",
+        "blocked",
+        "not_applicable"
+      ]
+    },
+    "assessment": {
+      "enum": [
+        "supported_concern",
+        "no_issue_observed",
+        "needs_clarification",
+        "not_assessed",
+        "not_applicable"
+      ]
+    },
+    "applicability": {
+      "enum": [
+        "applicable_supported",
+        "potentially_applicable",
+        "not_established",
+        "not_applicable_supported",
+        "not_assessed"
+      ]
+    },
+    "review": {
+      "enum": [
+        "not_required",
+        "pending",
+        "in_review",
+        "changes_requested",
+        "accepted",
+        "rejected",
+        "stale"
+      ]
+    },
+    "task": {
+      "enum": [
+        "queued",
+        "running",
+        "completed",
+        "partial",
+        "blocked",
+        "failed",
+        "cancelled"
+      ]
+    },
+    "attempt": {
+      "enum": [
+        "succeeded",
+        "no_results",
+        "failed",
+        "rate_limited",
+        "blocked",
+        "skipped"
+      ]
+    },
+    "severity": {
+      "enum": [
+        "critical",
+        "high",
+        "moderate",
+        "low",
+        "informational"
+      ]
+    },
+    "confidence": {
+      "enum": [
+        "low",
+        "medium",
+        "high"
+      ]
+    }
+  }
+}

@@ -1,0 +1,90 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://hanzet22.github.io/furcon-compliance-audit/schemas/common.schema.json",
+  "$defs": {
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_-]{2,63}$"
+    },
+    "ts": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "workflow": {
+      "enum": [
+        "not_started",
+        "in_progress",
+        "completed",
+        "partial",
+        "blocked",
+        "not_applicable"
+      ]
+    },
+    "assessment": {
+      "enum": [
+        "supported_concern",
+        "no_issue_observed",
+        "needs_clarification",
+        "not_assessed",
+        "not_applicable"
+      ]
+    },
+    "applicability": {
+      "enum": [
+        "applicable_supported",
+        "potentially_applicable",
+        "not_established",
+        "not_applicable_supported",
+        "not_assessed"
+      ]
+    },
+    "review": {
+      "enum": [
+        "not_required",
+        "pending",
+        "in_review",
+        "changes_requested",
+        "accepted",
+        "rejected",
+        "stale"
+      ]
+    },
+    "task": {
+      "enum": [
+        "queued",
+        "running",
+        "completed",
+        "partial",
+        "blocked",
+        "failed",
+        "cancelled"
+      ]
+    },
+    "attempt": {
+      "enum": [
+        "succeeded",
+        "no_results",
+        "failed",
+        "rate_limited",
+        "blocked",
+        "skipped"
+      ]
+    },
+    "severity": {
+      "enum": [
+        "critical",
+        "high",
+        "moderate",
+        "low",
+        "informational"
+      ]
+    },
+    "confidence": {
+      "enum": [
+        "low",
+        "medium",
+        "high"
+      ]
+    }
+  }
+}
