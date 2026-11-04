@@ -655,6 +655,30 @@
           },
           "revision": {
             "type": "string"
+          },
+          "reviewer_role": {
+            "type": "string"
+          },
+          "decision": {
+            "enum": [
+              "approve",
+              "request_changes",
+              "reject",
+              "defer",
+              "not_required"
+            ]
+          },
+          "rationale": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "stale_reason": {
+            "type": [
+              "string",
+              "null"
+            ]
           }
         },
         "required": [
