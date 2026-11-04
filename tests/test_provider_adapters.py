@@ -89,6 +89,26 @@ class ProviderAdapterTests(unittest.TestCase):
         self.assertEqual(result["fallback_attempts"][0]["provider_id"], "first")
         self.assertEqual(len(registry.candidates("search.web", "search")), 2)
 
+    def test_oversized_provider_response_is_rejected(self):
+        from furcon_audit.providers import MAX_PROVIDER_RESPONSE_BYTES
+        adapter = ExaAdapter(
+            api_key="key",
+            transport=lambda *args: HttpResponse(200, {}, b"x" * (MAX_PROVIDER_RESPONSE_BYTES + 1)),
+        )
+        with self.assertRaisesRegex(ProviderError, "2 MB limit"):
+            adapter.execute("search", {"query": "test"})
+
+    def test_registry_rejects_non_object_adapter_result(self):
+        class Broken:
+            declaration = CapabilityDeclaration("broken", "1", "search.web", ("search",),
+                                                 availability="available")
+            def execute(self, operation, payload):
+                return ["not", "an", "object"]
+        registry = CapabilityRegistry()
+        registry.register(Broken())
+        with self.assertRaisesRegex(ProviderError, "non-object"):
+            registry.execute_with_fallback("search.web", "search", {})
+
     def test_invalid_search_input_is_rejected(self):
         adapter = ExaAdapter(api_key="key")
         with self.assertRaises(ValueError):
