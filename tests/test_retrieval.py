@@ -7,7 +7,7 @@ from furcon_audit.retrieval import (
 
 class RetrievalPipelineTests(unittest.TestCase):
     @staticmethod
-    def public_dns(*_):
+    def public_dns(*_, **__):
         return [(None, None, None, None, ("93.184.216.34", 443))]
 
     def test_success_preserves_raw_and_extracted_content_with_hash(self):
