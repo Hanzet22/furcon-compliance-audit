@@ -28,3 +28,17 @@ jobs:
       - run: python -m pip install --no-deps --target /tmp/furcon-audit-install /tmp/furcon-audit-dist/*.whl
       - run: python -m unittest discover -s tests -v
       - run: furcon-audit examples/sample-report.v1.json --markdown /tmp/report.md
+
+  security-static:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+      - run: python -m pip install --upgrade pip
+      - run: python -m pip install pip-audit bandit
+      - run: pip-audit .
+      - run: bandit -q -r src
