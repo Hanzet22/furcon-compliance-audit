@@ -23,6 +23,8 @@ from urllib.robotparser import RobotFileParser
 
 USER_AGENT = "FurConComplianceAudit/2.0 (+read-only research)"
 DEFAULT_MAX_BYTES = 2_000_000
+MAX_RETRIEVAL_BYTES = 10_000_000
+MAX_RETRIEVAL_TIMEOUT_SECONDS = 60
 
 
 class RetrievalError(RuntimeError):
@@ -95,15 +97,24 @@ class _TextExtractor(HTMLParser):
 
 
 def _validate_public_url(url: str, resolver: Callable = socket.getaddrinfo) -> str:
-    parsed = urllib.parse.urlsplit(url)
+    if not isinstance(url, str) or not url or any(ord(char) < 32 or ord(char) == 127 for char in url):
+        raise RetrievalError("invalid_url", "URL must be a non-empty string without control characters.",
+                             outcome="blocked")
+    try:
+        parsed = urllib.parse.urlsplit(url)
+        explicit_port = parsed.port
+    except ValueError as exc:
+        raise RetrievalError("invalid_url", "URL contains an invalid host or port.",
+                             outcome="blocked") from exc
     if parsed.scheme not in {"http", "https"}:
         raise RetrievalError("unsupported_scheme", "Only HTTP and HTTPS URLs are allowed.",
                              outcome="blocked")
     if not parsed.hostname or parsed.username or parsed.password:
         raise RetrievalError("invalid_url", "URL must have a host and no embedded credentials.",
                              outcome="blocked")
-    if parsed.port not in {None, 80, 443}:
-        raise RetrievalError("nonstandard_port", "Non-standard ports are blocked.",
+    expected_port = 443 if parsed.scheme == "https" else 80
+    if explicit_port not in {None, expected_port}:
+        raise RetrievalError("nonstandard_port", "Only the scheme's standard port is allowed.",
                              outcome="blocked")
     host = parsed.hostname.rstrip(".").lower()
     if host in {"localhost", "localhost.localdomain"} or host.endswith(".localhost"):
@@ -228,6 +239,13 @@ def _robots_allowed(url: str, user_agent: str, fetch: Callable) -> bool:
     except RetrievalError:
         raise RetrievalError("robots_unavailable", "Could not verify robots.txt policy.",
                              outcome="blocked")
+    if (not isinstance(response, FetchResponse) or not isinstance(response.status, int)
+            or isinstance(response.status, bool) or not isinstance(response.body, bytes)):
+        raise RetrievalError("robots_unavailable", "Robots response was malformed.",
+                             outcome="blocked")
+    if len(response.body) > DEFAULT_MAX_BYTES:
+        raise RetrievalError("robots_too_large", "robots.txt exceeded the configured size limit.",
+                             outcome="blocked")
     if response.status == 404:
         return True
     if response.status in {401, 403}:
@@ -256,8 +274,12 @@ def retrieve_page(
     Raw decoded content and extracted text remain separate from Evidence. Callers must
     deliberately select excerpts and create Evidence records after source review.
     """
-    if timeout < 1 or max_bytes < 1:
-        raise ValueError("timeout and max_bytes must be positive")
+    if (not isinstance(timeout, (int, float)) or isinstance(timeout, bool)
+            or not 1 <= timeout <= MAX_RETRIEVAL_TIMEOUT_SECONDS):
+        raise ValueError(f"timeout must be between 1 and {MAX_RETRIEVAL_TIMEOUT_SECONDS} seconds")
+    if (not isinstance(max_bytes, int) or isinstance(max_bytes, bool)
+            or not 1 <= max_bytes <= MAX_RETRIEVAL_BYTES):
+        raise ValueError(f"max_bytes must be an integer between 1 and {MAX_RETRIEVAL_BYTES}")
     if attempt_id is not None and not re.fullmatch(r"[a-z][a-z0-9_-]{2,63}", attempt_id):
         raise ValueError("attempt_id must be a valid opaque ID")
     canonical_url = _validate_public_url(url, resolver=resolver)
@@ -285,7 +307,10 @@ def retrieve_page(
             raise RetrievalError("robots_disallowed", "robots.txt disallows this retrieval.",
                                  outcome="blocked")
         response = bounded_fetch(canonical_url)
-        if not isinstance(response, FetchResponse) or not isinstance(response.body, bytes):
+        if (not isinstance(response, FetchResponse) or not isinstance(response.body, bytes)
+                or not isinstance(response.status, int) or isinstance(response.status, bool)
+                or not isinstance(response.headers, dict)
+                or not isinstance(response.final_url, str)):
             raise RetrievalError("invalid_fetch_response", "Retriever returned an invalid response.")
         if len(response.body) > max_bytes:
             raise RetrievalError("payload_too_large",
@@ -296,7 +321,12 @@ def retrieve_page(
         if response.status < 200 or response.status >= 300:
             raise RetrievalError("http_error", f"Source returned HTTP {response.status}.")
         final_url = _validate_public_url(response.final_url, resolver=resolver)
+        if urllib.parse.urlsplit(canonical_url).scheme == "https" and urllib.parse.urlsplit(final_url).scheme != "https":
+            raise RetrievalError("https_downgrade", "HTTPS retrieval cannot redirect to HTTP.",
+                                 outcome="blocked")
         content_type = response.headers.get("Content-Type", response.headers.get("content-type", ""))
+        if not isinstance(content_type, str):
+            raise RetrievalError("invalid_content_type", "Content-Type header must be text.")
         media_type = content_type.split(";", 1)[0].strip().lower()
         if media_type not in {"text/html", "application/xhtml+xml", "text/plain"}:
             raise RetrievalError("unsupported_media_type", f"Unsupported content type: {media_type or 'unknown'}.",
