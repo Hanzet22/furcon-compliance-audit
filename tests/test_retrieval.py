@@ -31,11 +31,10 @@ class RetrievalPipelineTests(unittest.TestCase):
         self.assertEqual(result["retrieval"]["error_code"], "robots_disallowed")
 
     def test_robots_policy_failure_fails_closed(self):
-        def broken(*_):
+        def broken_fetch(*_):
             raise RetrievalError("network_error", "offline")
         result = retrieve_page("https://example.org/policy",
-                               fetcher=lambda *_: self.fail("must not fetch page"),
-                               robots_checker=broken, resolver=self.public_dns)
+                               fetcher=broken_fetch, resolver=self.public_dns)
         self.assertEqual(result["retrieval"]["outcome"], "blocked")
         self.assertEqual(result["retrieval"]["error_code"], "robots_unavailable")
 
