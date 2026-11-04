@@ -116,8 +116,27 @@ class ProviderAdapterTests(unittest.TestCase):
 
     def test_invalid_search_input_is_rejected(self):
         adapter = ExaAdapter(api_key="key")
-        with self.assertRaises(ValueError):
-            adapter.execute("search", {"query": " "})
+        for payload in ({"query": " "}, {"query": "x" * 4001}, None):
+            with self.subTest(payload_type=type(payload).__name__):
+                with self.assertRaises(ValueError):
+                    adapter.execute("search", payload)
+
+    def test_provider_redirects_are_not_followed(self):
+        from furcon_audit.providers import _NoRedirectHandler
+        import urllib.request
+        handler = _NoRedirectHandler()
+        request = urllib.request.Request("https://api.exa.ai/search")
+        self.assertIsNone(handler.redirect_request(
+            request, None, 302, "Found", {"Location": "https://attacker.example/"},
+            "https://attacker.example/"
+        ))
+
+    def test_provider_resource_limits_are_bounded(self):
+        for kwargs in ({"timeout": 61}, {"timeout": True},
+                       {"max_retries": 6}, {"max_retries": True}):
+            with self.subTest(kwargs=kwargs):
+                with self.assertRaises(ValueError):
+                    ExaAdapter(api_key="key", **kwargs)
 
 
 if __name__ == "__main__":
