@@ -12,7 +12,8 @@
 - Added DNS-pinned public retrieval, robots fail-closed handling, untrusted-markup exclusion, and security/conformance documentation.
 - Completed Phase 2C.1 repository audit and Phase 2C.2 code-level security hardening; see their audit reports for residual verification boundaries.
 - Froze the v1.0.0 API contract; added versioning policy, stable error envelope/schema, and contract conformance tests.
-- Started Phase 3.1 with an application engine boundary, explicit search/retrieval ports, validated runtime configuration, and migration architecture documentation.
+- Completed Phase 3.1 with an application engine boundary, explicit search/retrieval ports, validated runtime configuration, and migration architecture documentation.
+- Started Phase 3.2 by extracting research orchestration into an application service while retaining the legacy pipeline import as a compatibility wrapper.
 
 ## 1.2.0 — 2026-09-04
 - Added source discovery workflow.
