@@ -1,6 +1,6 @@
 # Changelog
 
-## 2.0.0 — 2026-11-05
+## 2.0.0 — 2026-11-05 (unreleased source version)
 - Replaced v1 architecture with platform-neutral core.
 - Added shared domain model and 15 Draft 2020-12 domain schemas.
 - Added semantic validator, capability registry, research lifecycle, Markdown renderer, CLI, synthetic fixture, and tests.
