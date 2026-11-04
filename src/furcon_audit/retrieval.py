@@ -249,6 +249,7 @@ def retrieve_page(
     max_bytes: int = DEFAULT_MAX_BYTES,
     fetcher: Callable[[str, int, int], FetchResponse] = _stdlib_fetch,
     robots_checker: Callable[[str, str, Callable], bool] = _robots_allowed,
+    resolver: Callable = socket.getaddrinfo,
 ) -> dict:
     """Retrieve one public page and return source/retrieval records plus preserved content.
 
@@ -259,7 +260,7 @@ def retrieve_page(
         raise ValueError("timeout and max_bytes must be positive")
     if attempt_id is not None and not re.fullmatch(r"[a-z][a-z0-9_-]{2,63}", attempt_id):
         raise ValueError("attempt_id must be a valid opaque ID")
-    canonical_url = _validate_public_url(url)
+    canonical_url = _validate_public_url(url, resolver=resolver)
     retrieval_id = "retrieval_" + uuid.uuid4().hex[:20]
     source_id = "source_" + hashlib.sha256(canonical_url.encode("utf-8")).hexdigest()[:20]
     now = datetime.now(timezone.utc).isoformat()
@@ -289,7 +290,7 @@ def retrieve_page(
                                  outcome="blocked")
         if response.status < 200 or response.status >= 300:
             raise RetrievalError("http_error", f"Source returned HTTP {response.status}.")
-        final_url = _validate_public_url(response.final_url)
+        final_url = _validate_public_url(response.final_url, resolver=resolver)
         content_type = response.headers.get("Content-Type", response.headers.get("content-type", ""))
         media_type = content_type.split(";", 1)[0].strip().lower()
         if media_type not in {"text/html", "application/xhtml+xml", "text/plain"}:
