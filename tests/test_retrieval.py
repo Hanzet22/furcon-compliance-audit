@@ -45,7 +45,7 @@ class RetrievalPipelineTests(unittest.TestCase):
                 _validate_public_url(url)
 
     def test_non_global_dns_answer_is_blocked(self):
-        def private_dns(*_):
+        def private_dns(*_, **__):
             return [(None, None, None, None, ("10.0.0.5", 443))]
         with self.assertRaises(RetrievalError):
             _validate_public_url("https://internal.example", resolver=private_dns)
