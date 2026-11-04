@@ -46,6 +46,23 @@ result = registry.execute_with_fallback(
 )
 ~~~
 
-Adapters normalize result metadata and provider request IDs where available. Retries are bounded and limited to transient HTTP/network failures. Fallback is capability-scoped and follows registration order. A missing key marks that adapter unavailable. Search results remain discovery leads—not legal evidence by themselves. Verify original sources, jurisdiction, issuer, status, date, and context before making an assessment.
+Adapters normalize result metadata and provider request IDs where available. Retries are bounded and limited to transient HTTP/network failures. Fallback is capability-scoped and follows registration order. A missing key marks that adapter unavailable. Search results remain discovery leads—not legal evidence by themselves.
 
-Legal applicability is fact-specific. Do not infer it solely from attendee nationality or website accessibility. Missing text/search failure does not prove breach. Preserve original-language material and translation provenance. Human review is required for legal conclusions.
+## Public-page retrieval
+
+Phase 2B.2 adds a separate retrieval layer. It accepts one candidate URL and produces a normalized Source record, a timestamped Retrieval record, and a content bundle containing the original decoded response separately from extracted text. The response is represented by a SHA-256 content hash; the full body is not silently promoted into Evidence.
+
+~~~python
+from furcon_audit.retrieval import retrieve_page
+
+capture = retrieve_page("https://example.org/event/terms")
+if capture["retrieval"]["outcome"] == "success":
+    text = capture["content"]["extracted_text"]
+    content_hash = capture["retrieval"]["content_hash"]
+~~~
+
+Retrieval is read-only, HTTP(S)-only, public-network-only, robots-aware, and size/time bounded. Local/private targets, restricted responses, robots disallowances, and unsupported media types are recorded as blocked retrievals—not treated as proof that a source does not exist. The current adapter supports HTML/XHTML and plain text; PDF and authenticated content are intentionally out of scope. Network behavior is tested with mocks; live retrieval is opt-in.
+
+## Legal methodology
+
+Legal applicability is fact-specific. Do not infer it solely from attendee nationality or website accessibility. Missing text/search failure does not prove breach. Preserve original-language material and translation provenance. Human review is required for legal conclusions. See `IMPLEMENTATION_ROADMAP.md` for phases 2B.1–2B.10.
