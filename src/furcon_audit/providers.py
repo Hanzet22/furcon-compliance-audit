@@ -100,10 +100,10 @@ class JsonSearchAdapter:
         for attempt in range(self.max_retries + 1):
             try:
                 response = self.transport(self.base_url, headers, body, self.timeout)
+                if not isinstance(response, HttpResponse) or not isinstance(response.body, bytes) or not isinstance(response.status, int):
+                    raise ProviderError(self.provider_id, "Transport returned an invalid response.")
                 LOGGER.debug("provider_request provider=%s attempt=%s status=%s",
                              self.provider_id, attempt + 1, response.status)
-                if not isinstance(response, HttpResponse) or not isinstance(response.body, bytes):
-                    raise ProviderError(self.provider_id, "Transport returned an invalid response.")
                 if len(response.body) > MAX_PROVIDER_RESPONSE_BYTES:
                     raise ProviderError(self.provider_id, "Provider response exceeded the 2 MB limit.")
                 if response.status == 429 or response.status in {408, 500, 502, 503, 504}:
