@@ -39,6 +39,40 @@
         "user_supplied_fact",
         "other"
       ]
+    },
+    "evidence_relations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "evidence_id": {
+            "$ref": "#/$defs/id"
+          },
+          "relationship": {
+            "enum": [
+              "supports",
+              "contradicts",
+              "qualifies",
+              "context"
+            ]
+          }
+        },
+        "required": [
+          "evidence_id",
+          "relationship"
+        ]
+      },
+      "uniqueItems": true
+    },
+    "verification_status": {
+      "enum": [
+        "unverified",
+        "partially_supported",
+        "supported",
+        "contradicted",
+        "mixed"
+      ]
     }
   },
   "required": [
@@ -134,4 +168,4 @@
       ]
     }
   }
-}
+}\n
