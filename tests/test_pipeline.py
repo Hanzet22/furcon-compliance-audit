@@ -65,6 +65,23 @@ class ResearchPipelineTests(unittest.TestCase):
         self.assertEqual(task.status, "blocked")
         self.assertEqual(result["retrievals"][0]["outcome"], "blocked")
 
+    def test_non_object_provider_response_is_recorded_as_failed_task(self):
+        class InvalidRegistry:
+            def execute_with_fallback(self, *args):
+                return ["invalid"]
+        task = self.task()
+        result = run_research_task(task, InvalidRegistry(), "event terms")
+        self.assertEqual(task.status, "failed")
+        self.assertIn("non-object response", result["unresolved"][0])
+
+    def test_malformed_source_capture_does_not_crash(self):
+        def malformed(url, *, attempt_id, **kwargs):
+            return {"source": ["bad"], "retrieval": {"outcome": "success"}}
+        task = self.task()
+        result = run_research_task(task, self.registry([{"url": "https://example.org/one"}]),
+                                   "event terms", page_retriever=malformed)
+        self.assertTrue(result["unresolved"])
+
     def test_invalid_query_rejected(self):
         with self.assertRaises(ValueError):
             run_research_task(self.task(), self.registry([]), " ")
