@@ -13,7 +13,7 @@ from typing import Any, Callable
 
 from .capabilities import CapabilityDeclaration
 
-LOGGER = logging.getLogger(__name__)
+LOGGER = logging.getLogger(__name__)\nMAX_PROVIDER_RESPONSE_BYTES = 2_000_000\n
 
 
 class ProviderError(RuntimeError):
@@ -37,9 +37,9 @@ def _stdlib_transport(url: str, headers: dict[str, str], body: bytes,
     request = urllib.request.Request(url, data=body, headers=headers, method="POST")
     try:
         with urllib.request.urlopen(request, timeout=timeout) as response:
-            return HttpResponse(response.status, dict(response.headers.items()), response.read())
+            return HttpResponse(response.status, dict(response.headers.items()), response.read(MAX_PROVIDER_RESPONSE_BYTES + 1))
     except urllib.error.HTTPError as exc:
-        return HttpResponse(exc.code, dict(exc.headers.items()) if exc.headers else {}, exc.read())
+        return HttpResponse(exc.code, dict(exc.headers.items()) if exc.headers else {}, exc.read(MAX_PROVIDER_RESPONSE_BYTES + 1))
 
 
 class JsonSearchAdapter:
@@ -100,7 +100,7 @@ class JsonSearchAdapter:
                 response = self.transport(self.base_url, headers, body, self.timeout)
                 LOGGER.debug("provider_request provider=%s attempt=%s status=%s",
                              self.provider_id, attempt + 1, response.status)
-                if response.status == 429 or response.status in {408, 500, 502, 503, 504}:
+                if not isinstance(response, HttpResponse) or not isinstance(response.body, bytes):\n                    raise ProviderError(self.provider_id, "Transport returned an invalid response.")\n                if len(response.body) > MAX_PROVIDER_RESPONSE_BYTES:\n                    raise ProviderError(self.provider_id, "Provider response exceeded the 2 MB limit.")\n                if response.status == 429 or response.status in {408, 500, 502, 503, 504}:
                     raise ProviderError(self.provider_id, f"Transient HTTP {response.status}",
                                         status_code=response.status, retryable=True)
                 if response.status < 200 or response.status >= 300:
