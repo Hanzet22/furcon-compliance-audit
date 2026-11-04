@@ -40,3 +40,23 @@ class ContractTests(unittest.TestCase):
         self.assertEqual(len(registry.candidates("search.web","search")),1)
         self.assertEqual(registry.candidates("search.web","inspect"),[])
 if __name__=="__main__": unittest.main()
+
+
+class ValidatorRobustnessTests(unittest.TestCase):
+    def sample(self):
+        return json.loads((ROOT / "examples/sample-report.v1.json").read_text(encoding="utf-8"))
+
+    def test_malformed_nested_rows_return_errors_not_exceptions(self):
+        for change in ({"sources": [None]}, {"claims": ["bad"]},
+                       {"human_reviews": [None]}, {"findings": [42]},
+                       {"research_tasks": "not-an-array"}):
+            with self.subTest(change=change):
+                data = self.sample()
+                data.update(change)
+                self.assertTrue(validate_report(data))
+
+    def test_semantic_validator_handles_malformed_collections(self):
+        from furcon_audit.validator import validate_report_semantics
+        errors = validate_report_semantics({"sources": [None], "claims": ["bad"],
+                                            "findings": [None], "research_tasks": "wrong"})
+        self.assertTrue(errors)
