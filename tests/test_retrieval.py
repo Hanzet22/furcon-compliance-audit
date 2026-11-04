@@ -75,6 +75,15 @@ class RetrievalPipelineTests(unittest.TestCase):
         self.assertEqual(result["source"]["canonical_url"], "https://example.org/canonical")
         self.assertEqual(result["source"]["source_id"], result["retrieval"]["source_id"])
 
+    def test_oversized_custom_fetcher_response_is_blocked(self):
+        body = b"x" * 32
+        response = FetchResponse(200, {"Content-Type": "text/plain"}, body,
+                                 "https://example.org")
+        result = retrieve_page("https://example.org", max_bytes=16,
+                               fetcher=lambda *args: response,
+                               robots_checker=lambda *_: True, resolver=self.public_dns)
+        self.assertEqual(result["retrieval"]["error_code"], "payload_too_large")
+
     def test_invalid_attempt_id_rejected(self):
         with self.assertRaises(ValueError):
             retrieve_page("https://example.org", attempt_id="INVALID!",
