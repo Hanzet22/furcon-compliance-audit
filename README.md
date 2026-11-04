@@ -13,6 +13,7 @@ Evidence-led preliminary review of convention terms, privacy notices, codes of c
 - Draft 2020-12 domain schemas and semantic reference validation.
 - Frozen v1.0.0 interchange contract with versioning policy and stable error envelope.
 - Phase 3 application-engine boundary with explicit search and retrieval ports.
+- Research orchestration extracted into an application service; the legacy pipeline entry point remains as a compatibility wrapper.
 
 ## Quick start
 Python 3.10+.
