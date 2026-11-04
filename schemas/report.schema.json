@@ -168,6 +168,13 @@
           },
           "outcome": {
             "type": "string"
+          },
+          "attempt_id": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "pattern": "^[a-z][a-z0-9_-]{2,63}$"
           }
         },
         "required": [
@@ -245,6 +252,13 @@
           },
           "title": {
             "type": "string"
+          },
+          "retrieval_id": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "pattern": "^[a-z][a-z0-9_-]{2,63}$"
           }
         },
         "required": [
@@ -478,6 +492,76 @@
     },
     "report_revision": {
       "type": "string"
+    },
+    "translations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "translation_id",
+          "evidence_id",
+          "source_language",
+          "target_language",
+          "method",
+          "translated_text",
+          "created_at",
+          "verification_status"
+        ],
+        "properties": {
+          "translation_id": {
+            "$ref": "#/$defs/id"
+          },
+          "evidence_id": {
+            "$ref": "#/$defs/id"
+          },
+          "source_language": {
+            "type": "string"
+          },
+          "target_language": {
+            "type": "string"
+          },
+          "method": {
+            "enum": [
+              "human",
+              "machine",
+              "official",
+              "other"
+            ]
+          },
+          "provider": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "translated_text": {
+            "type": "string"
+          },
+          "created_at": {
+            "$ref": "#/$defs/ts"
+          },
+          "verification_status": {
+            "enum": [
+              "unreviewed",
+              "verified",
+              "rejected"
+            ]
+          },
+          "reviewer_role": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "limitations": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "additionalProperties": true
+      }
     }
   },
   "required": [
@@ -500,7 +584,8 @@
     "human_reviews",
     "limitations",
     "unresolved_questions",
-    "generated_at"
+    "generated_at",
+    "translations"
   ],
   "$defs": {
     "id": {

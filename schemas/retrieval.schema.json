@@ -47,6 +47,13 @@
         "string",
         "null"
       ]
+    },
+    "attempt_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "pattern": "^[a-z][a-z0-9_-]{2,63}$"
     }
   },
   "required": [

@@ -30,3 +30,8 @@ Versioning: major may break; minor adds backward-compatible optional fields; pat
 - HumanReview → target IDs and revision.
 
 IDs are unique in each collection; every reference resolves. Supported concerns require supporting evidence and an assessment. Supported applicability requires legal proposition references. Partial/blocked/failed tasks require a reason. Accepted review becomes stale after material target/evidence changes.
+
+
+## Additional v2 records
+- ResearchAttempt has its own standalone schema and records provider, capability, operation, status, timing, retry, and normalized failure.
+- Translation records link to original Evidence and preserve source/target language, method, provider, translated text, verification state, and limitations.

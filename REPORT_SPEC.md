@@ -4,7 +4,7 @@
 JSON is canonical machine data; Markdown is canonical human-readable source. DOCX, HTML, PDF are optional renderers. Renderers cannot add findings, change statuses, omit material limitations, or imply legal advice.
 
 ## Contents and relationships
-Report includes IDs/version, event, scope, generation metadata, research tasks/attempts, source registry, retrievals, evidence, claims, legal authorities/propositions, jurisdiction assessments, assessments, findings, human reviews, limitations, unresolved questions, and timestamp. All references use stable IDs. Findings link to assessments/jurisdiction assessments; do not embed duplicate jurisdiction objects.
+Report includes IDs/version, event, scope, generation metadata, research tasks/attempts, source registry, retrievals, evidence, translation records, claims, legal authorities/propositions, jurisdiction assessments, assessments, findings, human reviews, limitations, unresolved questions, and timestamp. All references use stable IDs. Findings link to assessments/jurisdiction assessments; do not embed duplicate jurisdiction objects.
 
 ## Narrative sections
 Scope/event context; methodology and labels; research coverage/discovery trail; jurisdiction applicability; category assessments/findings; supporting/contrary evidence; human review/unresolved questions; source/evidence register.

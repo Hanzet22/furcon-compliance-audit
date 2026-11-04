@@ -9,7 +9,7 @@ class ContractTests(unittest.TestCase):
         for path in SCHEMA_DIR.glob("*.schema.json"):
             with self.subTest(path=path.name):
                 Draft202012Validator.check_schema(json.loads(path.read_text(encoding="utf-8")))
-    def test_sample_report_validates(self):
+    def test_translation_schema_is_available(self):\n        self.assertTrue((SCHEMA_DIR / "translation.schema.json").exists())\n        self.assertTrue((SCHEMA_DIR / "research-attempt.schema.json").exists())\n    def test_sample_report_validates(self):
         data=json.loads((ROOT/"examples/sample-report.v1.json").read_text(encoding="utf-8"))
         self.assertEqual(validate_report(data),[])
     def test_broken_reference_fails(self):

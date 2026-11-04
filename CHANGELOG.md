@@ -2,7 +2,7 @@
 
 ## 2.0.0 — 2026-11-05
 - Replaced v1 architecture with platform-neutral core.
-- Added shared domain model and 13 Draft 2020-12 schemas.
+- Added shared domain model and 15 Draft 2020-12 domain schemas.
 - Added semantic validator, capability registry, research lifecycle, Markdown renderer, CLI, synthetic fixture, and tests.
 - Added GitHub Actions core validation workflow.
 - JSON/Markdown canonical; DOCX optional.

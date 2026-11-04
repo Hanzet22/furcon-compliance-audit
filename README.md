@@ -10,7 +10,7 @@ Evidence-led preliminary review of convention terms, privacy notices, codes of c
 - Source → Retrieval → Evidence → Claim → Assessment → Finding traceability.
 - Separate legal authorities and legal propositions.
 - JSON/Markdown canonical outputs; DOCX/HTML/PDF optional.
-- Draft 2020-12 schemas plus semantic reference validation.
+- 15 Draft 2020-12 domain schemas plus semantic reference validation and translation provenance.
 
 ## Quick start
 Python 3.10+.
