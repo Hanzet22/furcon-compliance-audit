@@ -71,7 +71,19 @@ def run_research_task(
         return {"research_task": asdict(task), "research_attempts": attempts, "sources": [],
                 "retrievals": [], "captures": [], "unresolved": [str(exc)]}
 
-    for failure in search_result.get("fallback_attempts", []):
+    if not isinstance(search_result, dict):
+        task.transition("failed", "Search provider returned an invalid response.")
+        return {"research_task": asdict(task), "research_attempts": attempts,
+                "sources": [], "retrievals": [], "captures": [],
+                "unresolved": ["Search provider returned a non-object response."]}
+    fallback_attempts = search_result.get("fallback_attempts", [])
+    if not isinstance(fallback_attempts, list):
+        fallback_attempts = []
+        unresolved.append("Search provider returned malformed fallback metadata.")
+    for failure in fallback_attempts:
+        if not isinstance(failure, dict):
+            unresolved.append("Search provider returned a malformed fallback attempt.")
+            continue
         attempts.append(_attempt(
             task.research_task_id, failure.get("provider_id", "unknown"),
             "search.web", "search", "failed", started,
@@ -133,12 +145,14 @@ def run_research_task(
         ))
         # Keep the attempt reference stable and consistent with the retrieval record.
         capture["retrieval"]["attempt_id"] = attempts[-1]["attempt_id"]
-        if capture.get("source"):
-            source_id = capture["source"].get("source_id")
+        source_record = capture.get("source")
+        if isinstance(source_record, dict):
+            source_id = source_record.get("source_id")
             if source_id and all(item.get("source_id") != source_id for item in sources):
-                sources.append(capture["source"])
-        if capture.get("retrieval"):
-            retrievals.append(capture["retrieval"])
+                sources.append(source_record)
+        elif source_record is not None:
+            unresolved.append("Retriever returned a malformed source record.")
+        retrievals.append(capture["retrieval"])
         captures.append(capture)
         if outcome != "success":
             unresolved.append(error.get("message") or f"Retrieval outcome: {outcome}")
