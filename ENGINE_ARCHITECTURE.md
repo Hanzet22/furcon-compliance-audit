@@ -67,6 +67,6 @@ The rewrite is incremental and strangler-style. Existing public functions remain
 
 ## Phase 3.1 implementation
 
-The first migration seam is `AuditEngine`. It receives a search-registry port, a page-retriever port, and validated configuration. In this slice it delegates to the characterized research workflow, keeping the existing `run_research_task` import path stable. Later slices will move orchestration into the engine and turn the legacy function into a compatibility wrapper.
+The first migration seam is `AuditEngine`. It receives a search-registry port, a page-retriever port, and validated configuration. The research orchestration has now moved into `application/research.py`; `AuditEngine` calls that application service directly. The original `run_research_task` import path remains as a compatibility wrapper.
 
 This is an intentional transitional state, not the completed rewrite.
