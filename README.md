@@ -71,3 +71,20 @@ Legal applicability is fact-specific. Do not infer it solely from attendee natio
 ## Security and conformance
 
 See [SECURITY.md](SECURITY.md) for retrieval and data-handling boundaries and [COMPATIBILITY.md](COMPATIBILITY.md) for verified versus unverified integrations. Exa/Firecrawl tests use mocked REST fixtures; they are not live-provider certifications or agent-runtime compatibility claims.
+
+## Search-to-retrieval orchestration
+
+The core can now connect a configured search registry to the public-page retrieval layer without creating Evidence automatically:
+
+~~~python
+from furcon_audit.pipeline import run_research_task
+from furcon_audit.research import ResearchTask
+
+task = ResearchTask(
+    "task_policy_001", "audit_001", "Find official event policies",
+    ("identify official policy sources",),
+)
+result = run_research_task(task, registry, "official event privacy and refund policy")
+~~~
+
+The result preserves task/attempt records, source identities, retrieval records, captured content, and unresolved gaps. Evidence and claims remain empty until explicitly created through the evidence/claim workflow.
