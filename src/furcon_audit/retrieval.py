@@ -5,9 +5,11 @@ Search results are candidates only. Retrieval records never constitute legal con
 from __future__ import annotations
 
 import hashlib
+import http.client
 import ipaddress
 import re
 import socket
+import ssl
 import urllib.error
 import urllib.parse
 import urllib.request
@@ -41,6 +43,7 @@ class FetchResponse:
 class _TextExtractor(HTMLParser):
     BLOCK_TAGS = {"p", "div", "section", "article", "main", "li", "h1", "h2",
                   "h3", "h4", "h5", "h6", "br", "tr"}
+    IGNORED_TAGS = {"script", "style", "noscript", "iframe", "svg", "template"}
 
     def __init__(self) -> None:
         super().__init__(convert_charrefs=True)
@@ -48,8 +51,14 @@ class _TextExtractor(HTMLParser):
         self.title_parts: list[str] = []
         self.in_title = False
         self.language: str | None = None
+        self._ignored_depth = 0
 
     def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+        if tag in self.IGNORED_TAGS:
+            self._ignored_depth += 1
+            return
+        if self._ignored_depth:
+            return
         values = dict(attrs)
         if tag == "html":
             self.language = values.get("lang")
@@ -59,12 +68,19 @@ class _TextExtractor(HTMLParser):
             self.parts.append("\n")
 
     def handle_endtag(self, tag: str) -> None:
+        if tag in self.IGNORED_TAGS and self._ignored_depth:
+            self._ignored_depth -= 1
+            return
+        if self._ignored_depth:
+            return
         if tag == "title":
             self.in_title = False
         if tag in self.BLOCK_TAGS:
             self.parts.append("\n")
 
     def handle_data(self, data: str) -> None:
+        if self._ignored_depth:
+            return
         if self.in_title:
             self.title_parts.append(data)
         if data.strip():
