@@ -34,14 +34,24 @@ class HttpResponse:
     body: bytes
 
 
+class _NoRedirectHandler(urllib.request.HTTPRedirectHandler):
+    """Provider credentials must never be forwarded to a redirect destination."""
+
+    def redirect_request(self, req, fp, code, msg, headers, newurl):
+        return None
+
+
 def _stdlib_transport(url: str, headers: dict[str, str], body: bytes,
                       timeout: int) -> HttpResponse:
     request = urllib.request.Request(url, data=body, headers=headers, method="POST")
+    opener = urllib.request.build_opener(_NoRedirectHandler())
     try:
-        with urllib.request.urlopen(request, timeout=timeout) as response:
-            return HttpResponse(response.status, dict(response.headers.items()), response.read(MAX_PROVIDER_RESPONSE_BYTES + 1))
+        with opener.open(request, timeout=timeout) as response:
+            return HttpResponse(response.status, dict(response.headers.items()),
+                                response.read(MAX_PROVIDER_RESPONSE_BYTES + 1))
     except urllib.error.HTTPError as exc:
-        return HttpResponse(exc.code, dict(exc.headers.items()) if exc.headers else {}, exc.read(MAX_PROVIDER_RESPONSE_BYTES + 1))
+        return HttpResponse(exc.code, dict(exc.headers.items()) if exc.headers else {},
+                            exc.read(MAX_PROVIDER_RESPONSE_BYTES + 1))
 
 
 class JsonSearchAdapter:
@@ -54,8 +64,13 @@ class JsonSearchAdapter:
                  max_retries: int = 2,
                  transport: Callable[[str, dict[str, str], bytes, int], HttpResponse] = _stdlib_transport,
                  sleep: Callable[[float], None] = time.sleep) -> None:
-        if timeout < 1 or max_retries < 0:
-            raise ValueError("timeout must be positive and max_retries non-negative")
+        if (not isinstance(timeout, (int, float)) or isinstance(timeout, bool)
+                or not 1 <= timeout <= 60):
+            raise ValueError("timeout must be between 1 and 60 seconds")
+        if not isinstance(max_retries, int) or isinstance(max_retries, bool) or not 0 <= max_retries <= 5:
+            raise ValueError("max_retries must be an integer between 0 and 5")
+        if api_key is not None and not isinstance(api_key, str):
+            raise ValueError("api_key must be a string")
         self.api_key = api_key or os.getenv(self.key_env)
         self.timeout = timeout
         self.max_retries = max_retries
@@ -71,9 +86,13 @@ class JsonSearchAdapter:
         )
 
     def _request_payload(self, payload: dict[str, Any]) -> dict[str, Any]:
+        if not isinstance(payload, dict):
+            raise ValueError("payload must be an object")
         query = payload.get("query")
         if not isinstance(query, str) or not query.strip():
             raise ValueError("payload.query must be a non-empty string")
+        if len(query) > 4000 or any(ord(char) < 32 and char not in "\t\n\r" for char in query):
+            raise ValueError("payload.query exceeds the 4000-character limit or contains control characters")
         limit = payload.get("limit", 5)
         if not isinstance(limit, int) or isinstance(limit, bool) or not 1 <= limit <= 20:
             raise ValueError("payload.limit must be an integer between 1 and 20")
@@ -100,7 +119,9 @@ class JsonSearchAdapter:
         for attempt in range(self.max_retries + 1):
             try:
                 response = self.transport(self.base_url, headers, body, self.timeout)
-                if not isinstance(response, HttpResponse) or not isinstance(response.body, bytes) or not isinstance(response.status, int):
+                if (not isinstance(response, HttpResponse) or not isinstance(response.body, bytes)
+                        or not isinstance(response.status, int) or isinstance(response.status, bool)
+                        or not isinstance(response.headers, dict)):
                     raise ProviderError(self.provider_id, "Transport returned an invalid response.")
                 LOGGER.debug("provider_request provider=%s attempt=%s status=%s",
                              self.provider_id, attempt + 1, response.status)
@@ -118,8 +139,6 @@ class JsonSearchAdapter:
                     raise ProviderError(self.provider_id, "Provider returned invalid JSON.") from exc
                 if not isinstance(parsed, dict):
                     raise ProviderError(self.provider_id, "Provider returned a non-object JSON payload.")
-                if not isinstance(response.headers, dict):
-                    raise ProviderError(self.provider_id, "Transport returned invalid response headers.")
                 results = self._results(parsed)
                 return {
                     "provider_id": self.provider_id,
