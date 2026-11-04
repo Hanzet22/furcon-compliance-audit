@@ -8,6 +8,9 @@
 - JSON/Markdown canonical; DOCX optional.
 - Separated statuses and legal authority from organizer evidence.
 - Reframed as preliminary review; provider/agent compatibility remains unverified.
+- Implemented Phase 2B.1–2B.10 core workflows: search adapters, safe retrieval orchestration, explicit evidence capture, claims/corroboration, legal authority/proposition records, jurisdiction factors, assessments/findings, human review, and deterministic report rendering.
+- Added DNS-pinned public retrieval, robots fail-closed handling, untrusted-markup exclusion, and security/conformance documentation.
+- CI checkpoint: 60 tests passed and sample-report schema/semantic validation plus Markdown rendering succeeded (workflow run #62).
 
 ## 1.2.0 — 2026-09-04
 - Added source discovery workflow.
