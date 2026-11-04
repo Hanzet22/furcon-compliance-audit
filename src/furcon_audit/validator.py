@@ -101,7 +101,7 @@ def validate_report_semantics(report):
     jurisdictions = report.get("jurisdiction_assessments", [])
     if isinstance(jurisdictions, list):
         for pos, item in enumerate(jurisdictions):
-            if isinstance(item, dict) and item.get("applicability_status") in {"applicable_supported","not_applicable_supported"} and not item.get("legal_proposition_ids"):
+            if isinstance(item, dict) and isinstance(item.get("applicability_status"), str) and item.get("applicability_status") in {"applicable_supported","not_applicable_supported"} and not item.get("legal_proposition_ids"):
                 errors.append(f"jurisdiction_assessments[{pos}]: supported applicability requires legal propositions")
     tasks = report.get("research_tasks", [])
     if isinstance(tasks, list):
