@@ -39,6 +39,41 @@
       "items": {
         "type": "string"
       }
+    },
+    "territorial_scope": {
+      "enum": [
+        "supported",
+        "not_met",
+        "unclear",
+        "not_assessed"
+      ]
+    },
+    "material_scope": {
+      "enum": [
+        "supported",
+        "not_met",
+        "unclear",
+        "not_assessed"
+      ]
+    },
+    "threshold_status": {
+      "enum": [
+        "supported",
+        "not_met",
+        "unclear",
+        "not_assessed"
+      ]
+    },
+    "exemption_status": {
+      "enum": [
+        "identified",
+        "not_identified",
+        "unclear",
+        "not_assessed"
+      ]
+    },
+    "methodology_note": {
+      "type": "string"
     }
   },
   "required": [
