@@ -84,6 +84,33 @@ class RetrievalPipelineTests(unittest.TestCase):
                                robots_checker=lambda *_: True, resolver=self.public_dns)
         self.assertEqual(result["retrieval"]["error_code"], "payload_too_large")
 
+    def test_invalid_port_and_control_character_urls_are_blocked(self):
+        for url in ("https://example.org:bad/path", "https://example.org:8443/",
+                    "http://example.org:443/", "https://example.org/\nheader"):
+            with self.subTest(url=url):
+                with self.assertRaises(RetrievalError):
+                    _validate_public_url(url, resolver=self.public_dns)
+
+    def test_invalid_fetch_response_shape_is_recorded_not_raised(self):
+        malformed = FetchResponse(200, [], b"ok", "https://example.org")
+        result = retrieve_page("https://example.org", fetcher=lambda *_: malformed,
+                               robots_checker=lambda *_: True, resolver=self.public_dns)
+        self.assertEqual(result["retrieval"]["error_code"], "invalid_fetch_response")
+
+    def test_https_downgrade_is_blocked(self):
+        response = FetchResponse(200, {"Content-Type": "text/plain"}, b"ok",
+                                 "http://example.org/final")
+        result = retrieve_page("https://example.org/start", fetcher=lambda *_: response,
+                               robots_checker=lambda *_: True, resolver=self.public_dns)
+        self.assertEqual(result["retrieval"]["error_code"], "https_downgrade")
+
+    def test_resource_limits_are_bounded(self):
+        for kwargs in ({"max_bytes": 10_000_001}, {"max_bytes": True},
+                       {"timeout": 61}, {"timeout": True}):
+            with self.subTest(kwargs=kwargs):
+                with self.assertRaises(ValueError):
+                    retrieve_page("https://example.org", **kwargs)
+
     def test_invalid_attempt_id_rejected(self):
         with self.assertRaises(ValueError):
             retrieve_page("https://example.org", attempt_id="INVALID!",
