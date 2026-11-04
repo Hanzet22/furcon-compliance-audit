@@ -52,6 +52,42 @@
         "string",
         "null"
       ]
+    },
+    "publication_date": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date"
+    },
+    "effective_date": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date"
+    },
+    "end_date": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date"
+    },
+    "authority_status": {
+      "enum": [
+        "current",
+        "amended",
+        "repealed",
+        "historical",
+        "unknown"
+      ]
+    },
+    "original_language": {
+      "type": [
+        "string",
+        "null"
+      ]
     }
   },
   "required": [
